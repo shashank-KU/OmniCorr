@@ -15,11 +15,6 @@ Overall, this code provides a powerful tool for exploring correlations between d
 Install R (version >= 3.6.0) and RStudio (optional)
 Install the devtools package in R using install.packages("devtools")
 
-You can install the development version of OmniCorr like so:
-
-``` r
-devtools::install_github("shashank-KU/OmniCorr")
-```
 Dependencies
 
 check to see if packages are installed. Install them if they are not, then load them into the R session or follow their official installation steps
@@ -37,6 +32,11 @@ packages <- c("ggplot2", "WGCNA", "pheatmap", "RColorBrewer", "cowplot")
 ipak(packages)
 ```
 
+You can install the development version of OmniCorr like so:
+
+``` r
+devtools::install_github("shashank-KU/OmniCorr")
+```
 
 Load libraries
 ``` r
