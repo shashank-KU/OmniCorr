@@ -33,6 +33,9 @@ data(Transcriptomics)
 data(Metatranscriptomics)
 ```
 
+***Note:*** Before using the OmicsIntegrator package, it is important to ensure that the row names of the transcriptomics and metagenomics data frames are matching. 
+You can check this by running the command ```table(rownames(Transcriptomics) == rownames(Metagenomics))```. If the result is not all TRUE, then you will need to modify your data frames to ensure that the row names match.
+
 ## Steps
 
 The following steps use OmicsIntegrator to integrate transcriptomics and metagenomics data and visualize the results:
@@ -55,8 +58,8 @@ Create a data frame from the transposed data using data.frame()
 Generate a heatmap of the data using pheatmap() with the dendrogram from Step 1 and no column tree
 
 ``` r
-Transcriptomics<-data.frame(t(Transcriptomics))
-result2 <-pheatmap(Transcriptomics, 
+Transcriptomics <- data.frame(t(Transcriptomics))
+result2 <- pheatmap(Transcriptomics, 
                    cluster_rows = dendro, 
                    cluster_cols = F, 
                    show_rownames = F, 
@@ -129,7 +132,7 @@ cowplot::plot_grid(result2$gtable,
   ggplot2::theme(plot.margin = ggplot2::unit(c(1,1,1,1), "cm"))
 ```
 
-![Rplot](https://user-images.githubusercontent.com/30895959/223124413-71981e48-a295-48cd-959a-8aec5e15d863.png)
+![Omics Integration](https://user-images.githubusercontent.com/30895959/223124413-71981e48-a295-48cd-959a-8aec5e15d863.png)
 
 
 
