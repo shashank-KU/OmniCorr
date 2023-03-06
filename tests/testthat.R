@@ -7,6 +7,6 @@
 # * https://testthat.r-lib.org/reference/test_package.html#special-files
 
 library(testthat)
-library(OmicsIntegrator)
+library(OmniCorr)
 
-test_check("OmicsIntegrator")
+test_check("OmniCorr")

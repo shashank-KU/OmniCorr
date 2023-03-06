@@ -16,10 +16,7 @@
 #'
 #' @examples
 #' # Calculate correlation between two data frames using default parameters
-#' result_list <- calculate_correlations(df1 = transcriptomics_data, df2 = metagenomics_data)
-#'
-#' # Calculate correlation between two data frames using Kendall correlation and Bonferroni adjustment
-#' result_list <- calculate_correlations(df1, df2, method = "kendall", adjust_method = "bonferroni")
+#' result_list <- calculate_correlations(df1 = Transcriptomics, df2 = Metagenomics)
 #'
 #' @export
 calculate_correlations <- function(df1, df2, method="pearson", adjust_method="fdr") {
