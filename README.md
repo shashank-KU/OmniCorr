@@ -1,5 +1,5 @@
 
-# OmicsIntegrator
+# OmniCorr
 
 <!-- badges: start -->
 <!-- badges: end -->
@@ -15,14 +15,14 @@ Overall, this code provides a powerful tool for exploring correlations between d
 Install R (version >= 3.6.0) and RStudio (optional)
 Install the devtools package in R using install.packages("devtools")
 
-You can install the development version of OmicsIntegrator like so:
+You can install the development version of OmniCorr like so:
 
 ``` r
-devtools::install_github("shashank-KU/OmicsIntegrator")
+devtools::install_github("shashank-KU/OmniCorr")
 ```
 Load libraries
 ``` r
-library(OmicsIntegrator)
+library(OmniCorr)
 library(pheatmap)
 ```
 
@@ -33,12 +33,12 @@ data(Transcriptomics)
 data(Metatranscriptomics)
 ```
 
-***Note:*** Before using the OmicsIntegrator package, it is important to ensure that the row names of the transcriptomics and metagenomics data frames are matching. 
+***Note:*** Before using the OmniCorr package, it is important to ensure that the row names of the transcriptomics and metagenomics data frames are matching. 
 You can check this by running the command ```table(rownames(Transcriptomics) == rownames(Metagenomics))```. If the result is not all TRUE, then you will need to modify your data frames to ensure that the row names match.
 
 ## Steps
 
-The following steps use OmicsIntegrator to integrate transcriptomics and metagenomics data and visualize the results:
+The following steps use OmniCorr to integrate transcriptomics and metagenomics data and visualize the results:
 
 ### Step 1: Perform hierarchical clustering of transcriptomics data using WGCNA
 
@@ -65,21 +65,21 @@ result2 <- pheatmap(Transcriptomics,
                    main = paste("Transcriptomics"))
 ```
 
-### Step 3: Calculate correlations between transcriptomics and metagenomics data using OmicsIntegrator
+### Step 3: Calculate correlations between omics data
 
-Use the calculate_correlations() function from OmicsIntegrator to calculate Pearson correlations between the transposed transcriptomics data and the metagenomics data
+Use the calculate_correlations() function from OmniCorr to calculate Pearson correlations between the transposed transcriptomics data and the metagenomics data
 
 ``` r
 result3 <- calculate_correlations(df1 = t(Transcriptomics), 
                                  df2 = Metagenomics)
 ```
-Use the calculate_correlations() function from OmicsIntegrator to calculate Pearson correlations between the transposed transcriptomics data and the metatranscriptomics data
+Use the calculate_correlations() function from OmniCorr to calculate Pearson correlations between the transposed transcriptomics data and the metatranscriptomics data
 ``` r
 result3.1 <- calculate_correlations(df1 = t(Transcriptomics), 
                                  df2 = Metatranscriptomics)
 ```
 
-### Step 4: Generate a heatmap of the correlations between transcriptomics and metagenomics data
+### Step 4: Generate a heatmap of the correlations between transcriptomics with metagenomics and metatranscriptomics data
 
 Create a color ramp for the heatmap using colorRampPalette()
 Generate a heatmap of the correlations using pheatmap() with the dendrogram from Step 1, the color ramp, and no row tree
