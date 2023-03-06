@@ -22,7 +22,7 @@ devtools::install_github("shashank-KU/OmniCorr")
 ```
 Dependencies
 
-check to see if packages are installed. Install them if they are not, then load them into the R session.
+check to see if packages are installed. Install them if they are not, then load them into the R session or follow their official installation steps
 
 ```r
 ipak <- function(pkg){
@@ -36,6 +36,7 @@ sapply(pkg, require, character.only = TRUE)
 packages <- c("ggplot2", "WGCNA", "pheatmap", "RColorBrewer", "cowplot")
 ipak(packages)
 ```
+
 
 Load libraries
 ``` r
