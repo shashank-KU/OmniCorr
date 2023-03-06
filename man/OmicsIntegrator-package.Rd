@@ -8,6 +8,14 @@
 \description{
 This function takes in two data frames df1 and df2, and calculates the correlation matrix between the columns of both data frames. The user can specify the correlation method to be used by passing the method parameter. By default, the function uses Pearson correlation. The function calculates the p-values for the correlation tests and adjusts them for multiple testing using the specified adjustment method (default method is False Discovery Rate adjustment). The function returns a list of the correlation results including the correlation matrix, the p-value matrix, the adjusted p-value matrix, and the significance matrix indicating the significance level of the correlations.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{https://github.com/shashank-KU/OmicsIntegrator}
+  \item Report bugs at \url{https://github.com/shashank-KU/OmicsIntegrator/issues}
+}
+
+}
 \author{
 \strong{Maintainer}: Shashank Gupta \email{bioinformaticssrm2011@gmail.com} (\href{https://orcid.org/0000-0001-8839-7003}{ORCID})
 
