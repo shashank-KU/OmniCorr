@@ -20,10 +20,14 @@ You can install the development version of OmicsIntegrator like so:
 ``` r
 devtools::install_github("shashank-KU/OmicsIntegrator")
 ```
-Load libraries and data
+Load libraries
 ``` r
 library(OmicsIntegrator)
 library(pheatmap)
+```
+
+Load example datasets
+``` r
 data(Metagenomics)
 data(Transcriptomics)
 data(Metatranscriptomics)
