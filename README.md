@@ -42,6 +42,8 @@ Load libraries
 library(OmniCorr)
 library(pheatmap)
 library(WGCNA)
+library(ggplot2)
+library(cowplot)
 ```
 
 Load example datasets
