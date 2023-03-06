@@ -13,7 +13,7 @@ Overall, this code provides a powerful tool for exploring correlations between d
 ## Installation
 
 Install R (version >= 3.6.0) and RStudio (optional)
-Install the devtools package in R using install.packages("devtools")
+Install the devtools package in R using `install.packages("devtools")`
 
 Dependencies
 
