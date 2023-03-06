@@ -35,6 +35,7 @@ Perform hierarchical clustering on the distance matrix using hclust() with "ward
 library(OmicsIntegrator)
 Metagenomics <- readRDS("data-raw/wgcna_metagenomics_eigengenes.rds")
 Transcriptomics <- readRDS("data-raw/wgcna_transcriptomics_Liver_eigengenes.rds")
+Metatranscriptomics <- readRDS("data-raw/Metatranscriptomics.rds")
 
 dendro <- hclust(as.dist(1 - WGCNA::bicor(Transcriptomics, maxPOutliers = 0.05)), method = "ward.D2")
 ```
@@ -48,7 +49,9 @@ Generate a heatmap of the data using pheatmap() with the dendrogram from Step 1 
 ``` r
 Transcriptomics<-data.frame(t(Transcriptomics))
 result2 <-pheatmap(Transcriptomics, 
-                   cluster_rows = dendro)
+                   cluster_rows = dendro, 
+                   cluster_cols = F,
+                   main = paste("Transcriptomics"))
 ```
 
 ### Step 3: Calculate correlations between transcriptomics and metagenomics data using OmicsIntegrator
@@ -58,6 +61,11 @@ Use the calculate_correlations() function from OmicsIntegrator to calculate Pear
 ``` r
 result3 <- calculate_correlations(df1 = t(Transcriptomics), 
                                  df2 = Metagenomics)
+```
+Use the calculate_correlations() function from OmicsIntegrator to calculate Pearson correlations between the transposed transcriptomics data and the metatranscriptomics data
+``` r
+result3.1 <- calculate_correlations(df1 = t(Transcriptomics), 
+                                 df2 = Metatranscriptomics)
 ```
 
 ### Step 4: Generate a heatmap of the correlations between transcriptomics and metagenomics data
@@ -69,17 +77,31 @@ Add significant correlations to the heatmap using the display_numbers parameter 
 ``` r
 heatmap_colors <- colorRampPalette(rev(RColorBrewer::brewer.pal(n = 6, name ="RdBu")))(51)
 
-result4 <- pheatmap::pheatmap(result2$correlation, 
+result4 <- pheatmap::pheatmap(result3$correlation, 
                    color = heatmap_colors, 
                    treeheight_col = 0, 
                    treeheight_row = 0,
                    cluster_rows = dendro,
                    #cutree_rows = row_cut,
-                   display_numbers = result2$signif_matrix, 
+                   display_numbers = result3$signif_matrix, 
                    breaks = seq(from = -1, to = 1, length.out = 51), 
                    show_rownames = T, legend = T,
-                   labels_row = paste0(rownames(result2$correlation)),
-                   labels_col = paste0(colnames(result2$correlation)))
+                   labels_row = paste0(rownames(result3$correlation)),
+                   labels_col = paste0(colnames(result3$correlation)),
+                   main = paste("Metagenomics"))
+
+result4.1 <- pheatmap::pheatmap(result3.1$correlation, 
+                   color = heatmap_colors, 
+                   treeheight_col = 0, 
+                   treeheight_row = 0,
+                   cluster_rows = dendro,
+                   #cutree_rows = row_cut,
+                   display_numbers = result3.1$signif_matrix, 
+                   breaks = seq(from = -1, to = 1, length.out = 51), 
+                   show_rownames = T, legend = T,
+                   labels_row = paste0(rownames(result3.1$correlation)),
+                   labels_col = paste0(colnames(result3.1$correlation)),
+                   main = paste("Metatranscriptomics"))
 ```
 
 Step 5: Combine the heatmap of transcriptomics data and the heatmap of correlations
@@ -91,9 +113,10 @@ Adjust the margins of the plot using ggplot2::theme() with the plot.margin param
 
 ``` r
 cowplot::plot_grid(result2$gtable, 
-                   result4$gtable, 
-                   ncol = 2, 
-                   rel_widths = c(3.5, 1)) + 
+                   result4$gtable,
+                   result4.1$gtable,
+                   ncol = 3,  align = 'h',
+                   rel_widths = c(3.5, 1.5,2)) + 
   ggplot2::theme(plot.margin = ggplot2::unit(c(1,1,1,1), "cm"))
 ```
 
