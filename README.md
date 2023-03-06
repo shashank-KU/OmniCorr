@@ -50,7 +50,6 @@ Perform hierarchical clustering on the distance matrix using hclust() with "ward
 ``` r
 dendro <- hclust(as.dist(1 - WGCNA::bicor(Transcriptomics, maxPOutliers = 0.05)), method = "ward.D2")
 ```
-
 ### Step 2: Generate a heatmap of transcriptomics data with dendrogram
 
 Transpose the transcriptomics data using t()
