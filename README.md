@@ -129,11 +129,7 @@ cowplot::plot_grid(result2$gtable,
   ggplot2::theme(plot.margin = ggplot2::unit(c(1,1,1,1), "cm"))
 ```
 
-```r
-knitr::include_graphics("/Users/shashankgupta/Desktop/R/OmicsIntegrator/Images/Rplot.png")
-```
-
-
+![Rplot](https://user-images.githubusercontent.com/30895959/223124413-71981e48-a295-48cd-959a-8aec5e15d863.png)
 
 
 
