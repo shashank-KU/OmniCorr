@@ -20,10 +20,28 @@ You can install the development version of OmniCorr like so:
 ``` r
 devtools::install_github("shashank-KU/OmniCorr")
 ```
+Dependencies
+
+check to see if packages are installed. Install them if they are not, then load them into the R session.
+
+```r
+ipak <- function(pkg){
+new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
+if (length(new.pkg)) 
+    install.packages(new.pkg, dependencies = TRUE)
+sapply(pkg, require, character.only = TRUE)
+}
+
+# usage
+packages <- c("ggplot2", "WGCNA", "pheatmap", "RColorBrewer", "cowplot")
+ipak(packages)
+```
+
 Load libraries
 ``` r
 library(OmniCorr)
 library(pheatmap)
+library(WGCNA)
 ```
 
 Load example datasets
