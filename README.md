@@ -33,6 +33,11 @@ data(Transcriptomics)
 data(Metatranscriptomics)
 ```
 
+The input data for this package comes from the output of various analysis steps performed on different types of omics data such as transcriptomics, metatranscriptomics, metagenomics, proteomics, etc. For example, in the case of metatranscriptomics, the input data is generated from the output of the `blockwiseModules` function of the `WGCNA` package, which performs a network analysis of gene expression data to identify gene modules. The `chooseTopHubInEachModule` function is then used to identify the top hub genes in each module. The resulting data is stored in a list called Metatranscriptomics, which contains information about the identified modules and top hub genes.
+
+Similarly, for other types of omics data, different analysis steps are performed to generate input data for the package. For example, in the case of metagenomics, the input data may be generated from the output of functional annotation and pathway analysis tools. The specific analysis steps and tools used may vary depending on the type of omics data being analyzed.
+
+
 ***Note:*** Before using the OmniCorr package, it is important to ensure that the row names of the transcriptomics and metagenomics data frames are matching. 
 You can check this by running the command ```table(rownames(Transcriptomics) == rownames(Metagenomics))```. If the result is not all TRUE, then you will need to modify your data frames to ensure that the row names match.
 
@@ -40,21 +45,21 @@ You can check this by running the command ```table(rownames(Transcriptomics) == 
 
 The following steps use OmniCorr to integrate transcriptomics and metagenomics data and visualize the results:
 
-### Step 1: Perform hierarchical clustering of transcriptomics data using WGCNA
+### Step 1: Perform hierarchical clustering of transcriptomics data using `WGCNA`
 
 Load the WGCNA package in R
-Calculate the bicorrelation matrix of transcriptomics data with outlier removal using the bicor() function
-Convert the matrix to a distance matrix using as.dist()
-Perform hierarchical clustering on the distance matrix using hclust() with "ward.D2" method
+Calculate the bicorrelation matrix of transcriptomics data with outlier removal using the `bicor()` function
+Convert the matrix to a distance matrix using `as.dist()`
+Perform hierarchical clustering on the distance matrix using `hclust()` with `ward.D2` method
 
 ``` r
 dendro <- hclust(as.dist(1 - WGCNA::bicor(Transcriptomics, maxPOutliers = 0.05)), method = "ward.D2")
 ```
 ### Step 2: Generate a heatmap of transcriptomics data with dendrogram
 
-Transpose the transcriptomics data using t()
-Create a data frame from the transposed data using data.frame()
-Generate a heatmap of the data using pheatmap() with the dendrogram from Step 1 and no column tree
+Transpose the transcriptomics data using `t()`
+Create a data frame from the transposed data using `data.frame()`
+Generate a heatmap of the data using `pheatmap()` with the dendrogram from Step 1 and no column tree
 
 ``` r
 Transcriptomics <- data.frame(t(Transcriptomics))
@@ -67,7 +72,7 @@ result2 <- pheatmap(Transcriptomics,
 
 ### Step 3: Calculate correlations between omics data
 
-Use the calculate_correlations() function from OmniCorr to calculate Pearson correlations between the transposed transcriptomics data and the metagenomics data
+Use the `calculate_correlations()` function from `OmniCorr` to calculate `Pearson` correlations between the transposed transcriptomics data and the metagenomics data
 
 ``` r
 result3 <- calculate_correlations(df1 = t(Transcriptomics), 
@@ -81,9 +86,9 @@ result3.1 <- calculate_correlations(df1 = t(Transcriptomics),
 
 ### Step 4: Generate a heatmap of the correlations between transcriptomics with metagenomics and metatranscriptomics data
 
-Create a color ramp for the heatmap using colorRampPalette()
-Generate a heatmap of the correlations using pheatmap() with the dendrogram from Step 1, the color ramp, and no row tree
-Add significant correlations to the heatmap using the display_numbers parameter from pheatmap()
+Create a color ramp for the heatmap using `colorRampPalette()`
+Generate a heatmap of the correlations using `pheatmap()` with the dendrogram from Step 1, the color ramp, and no row tree
+Add significant correlations to the heatmap using the display_numbers parameter from `pheatmap()`
 
 ``` r
 heatmap_colors <- colorRampPalette(rev(RColorBrewer::brewer.pal(n = 6, name ="RdBu")))(51)
@@ -117,9 +122,9 @@ result4.1 <- pheatmap::pheatmap(result3.1$correlation,
 
 ### Step 5: Combine the heatmap of transcriptomics data and the heatmap of correlations
 
-Use the plot_grid() function from the cowplot package to combine the two heatmaps into a single figure with two columns
+Use the `plot_grid()` function from the cowplot package to combine the two heatmaps into a single figure with two columns
 Set the relative widths of the two columns using the rel_widths parameter
-Adjust the margins of the plot using ggplot2::theme() with the plot.margin parameter
+Adjust the margins of the plot using `ggplot2::theme()` with the `plot.margin` parameter
 
 
 ``` r
