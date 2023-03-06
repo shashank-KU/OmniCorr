@@ -13,9 +13,8 @@ Overall, this code provides a powerful tool for exploring correlations between d
 ## Installation
 
 Install R (version >= 3.6.0) and RStudio (optional)
-Install the devtools package in R using `install.packages("devtools")`
 
-Dependencies
+### Dependencies
 
 check to see if packages are installed. Install them if they are not, then load them into the R session or follow their official installation steps
 
@@ -28,7 +27,7 @@ sapply(pkg, require, character.only = TRUE)
 }
 
 # usage
-packages <- c("ggplot2", "WGCNA", "pheatmap", "RColorBrewer", "cowplot")
+packages <- c("ggplot2", "WGCNA", "pheatmap", "RColorBrewer", "cowplot", "devtools")
 ipak(packages)
 ```
 
@@ -38,7 +37,7 @@ You can install the development version of OmniCorr like so:
 devtools::install_github("shashank-KU/OmniCorr")
 ```
 
-Load libraries
+### Load libraries
 ``` r
 library(OmniCorr)
 library(pheatmap)
@@ -47,7 +46,7 @@ library(ggplot2)
 library(cowplot)
 ```
 
-Load example datasets
+### Load example datasets
 ``` r
 data(Metagenomics)
 data(Transcriptomics)
