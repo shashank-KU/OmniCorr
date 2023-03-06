@@ -128,8 +128,10 @@ cowplot::plot_grid(result2$gtable,
                    rel_widths = c(3, 1, 2)) + 
   ggplot2::theme(plot.margin = ggplot2::unit(c(1,1,1,1), "cm"))
 ```
-![Omics Integration](/Users/shashankgupta/Desktop/R/OmicsIntegrator/Images/Rplot.png)
 
+```r
+knitr::include_graphics("/Users/shashankgupta/Desktop/R/OmicsIntegrator/Images/Rplot.png")
+```
 
 
 
