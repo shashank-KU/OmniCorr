@@ -20,6 +20,15 @@ You can install the development version of OmicsIntegrator like so:
 ``` r
 devtools::install_github("shashank-KU/OmicsIntegrator")
 ```
+Load libraries and data
+``` r
+library(OmicsIntegrator)
+library(pheatmap)
+data(Metagenomics)
+data(Transcriptomics)
+data(Metatranscriptomics)
+```
+
 ## Steps
 
 The following steps use OmicsIntegrator to integrate transcriptomics and metagenomics data and visualize the results:
@@ -32,12 +41,6 @@ Convert the matrix to a distance matrix using as.dist()
 Perform hierarchical clustering on the distance matrix using hclust() with "ward.D2" method
 
 ``` r
-library(OmicsIntegrator)
-library(pheatmap)
-data(Metagenomics)
-data(Transcriptomics)
-data(Metatranscriptomics)
-
 dendro <- hclust(as.dist(1 - WGCNA::bicor(Transcriptomics, maxPOutliers = 0.05)), method = "ward.D2")
 ```
 
