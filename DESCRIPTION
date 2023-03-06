@@ -27,3 +27,5 @@ Depends:
     R (>= 2.10)
 LazyData: true
 Config/testthat/edition: 3
+URL: https://github.com/shashank-KU/OmicsIntegrator
+BugReports: https://github.com/shashank-KU/OmicsIntegrator/issues
