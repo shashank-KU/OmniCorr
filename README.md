@@ -58,7 +58,8 @@ Generate a heatmap of the data using pheatmap() with the dendrogram from Step 1 
 Transcriptomics<-data.frame(t(Transcriptomics))
 result2 <-pheatmap(Transcriptomics, 
                    cluster_rows = dendro, 
-                   cluster_cols = F,
+                   cluster_cols = F, 
+                   show_rownames = F, 
                    main = paste("Transcriptomics"))
 ```
 
@@ -93,7 +94,7 @@ result4 <- pheatmap::pheatmap(result3$correlation,
                    #cutree_rows = row_cut,
                    display_numbers = result3$signif_matrix, 
                    breaks = seq(from = -1, to = 1, length.out = 51), 
-                   show_rownames = T, legend = T,
+                   show_rownames = F, legend = F,
                    labels_row = paste0(rownames(result3$correlation)),
                    labels_col = paste0(colnames(result3$correlation)),
                    main = paste("Metagenomics"))
@@ -124,9 +125,10 @@ cowplot::plot_grid(result2$gtable,
                    result4$gtable,
                    result4.1$gtable,
                    ncol = 3,  align = 'h',
-                   rel_widths = c(3.5, 1.5,2)) + 
+                   rel_widths = c(3, 1, 2)) + 
   ggplot2::theme(plot.margin = ggplot2::unit(c(1,1,1,1), "cm"))
 ```
+![Omics Integration](/Users/shashankgupta/Desktop/R/OmicsIntegrator/Images/Rplot.png)
 
 
 
