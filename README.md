@@ -78,7 +78,7 @@ Use the `calculate_correlations()` function from `OmniCorr` to calculate `Pearso
 result3 <- calculate_correlations(df1 = t(Transcriptomics), 
                                  df2 = Metagenomics)
 ```
-Use the calculate_correlations() function from OmniCorr to calculate Pearson correlations between the transposed transcriptomics data and the metatranscriptomics data
+Use the `calculate_correlations()` function from `OmniCorr` to calculate `Pearson` correlations between the transposed transcriptomics data and the metatranscriptomics data
 ``` r
 result3.1 <- calculate_correlations(df1 = t(Transcriptomics), 
                                  df2 = Metatranscriptomics)
@@ -87,7 +87,7 @@ result3.1 <- calculate_correlations(df1 = t(Transcriptomics),
 ### Step 4: Generate a heatmap of the correlations between transcriptomics with metagenomics and metatranscriptomics data
 
 Create a color ramp for the heatmap using `colorRampPalette()`
-Generate a heatmap of the correlations using `pheatmap()` with the dendrogram from Step 1, the color ramp, and no row tree
+Generate a heatmap of the correlations using `pheatmap()` with the dendrogram from [Step 1](https://github.com/shashank-KU/OmniCorr#step-1-perform-hierarchical-clustering-of-transcriptomics-data-using-wgcna), the color ramp, and no row tree
 Add significant correlations to the heatmap using the display_numbers parameter from `pheatmap()`
 
 ``` r
@@ -123,7 +123,7 @@ result4.1 <- pheatmap::pheatmap(result3.1$correlation,
 ### Step 5: Combine the heatmap of transcriptomics data and the heatmap of correlations
 
 Use the `plot_grid()` function from the cowplot package to combine the two heatmaps into a single figure with two columns
-Set the relative widths of the two columns using the rel_widths parameter
+Set the relative widths of the two columns using the `rel_widths` parameter
 Adjust the margins of the plot using `ggplot2::theme()` with the `plot.margin` parameter
 
 
