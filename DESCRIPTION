@@ -22,6 +22,7 @@ Imports:
     magrittr,
     pheatmap,
     RColorBrewer,
+    tibble,
     WGCNA
 Depends: 
     R (>= 2.10)

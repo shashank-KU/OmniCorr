@@ -166,5 +166,6 @@ cowplot::plot_grid(result2$gtable,
 
 
 
+### Step 6: Combine the external heatmap of transcriptomics data and the heatmap of correlations
 
 
