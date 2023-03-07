@@ -82,8 +82,7 @@ Create a data frame from the transposed data using `data.frame()`
 Generate a heatmap of the data using `pheatmap()` with the dendrogram from Step 1 and no column tree
 
 ``` r
-Transcriptomics <- data.frame(t(Transcriptomics))
-result2 <- pheatmap(Transcriptomics, 
+result2 <- pheatmap(t(Transcriptomics), 
                    cluster_rows = dendro, 
                    cluster_cols = F, 
                    show_rownames = F, 
@@ -95,12 +94,12 @@ result2 <- pheatmap(Transcriptomics,
 Use the `calculate_correlations()` function from `OmniCorr` to calculate `Pearson` correlations between the transposed transcriptomics data and the metagenomics data
 
 ``` r
-result3 <- calculate_correlations(df1 = t(Transcriptomics), 
+result3 <- calculate_correlations(df1 = Transcriptomics, 
                                  df2 = Metagenomics)
 ```
 Use the `calculate_correlations()` function from `OmniCorr` to calculate `Pearson` correlations between the transposed transcriptomics data and the metatranscriptomics data
 ``` r
-result3.1 <- calculate_correlations(df1 = t(Transcriptomics), 
+result3.1 <- calculate_correlations(df1 = Transcriptomics, 
                                  df2 = Metatranscriptomics)
 ```
 
