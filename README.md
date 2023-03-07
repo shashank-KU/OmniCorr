@@ -19,7 +19,7 @@ Install R (version >= 3.6.0) and RStudio (optional)
 check to see if packages are installed. Install them if they are not, then load them into the R session or follow their official installation steps
 
 ```r
-ipak <- function(pkg){
+install_pak <- function(pkg){
 new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
 if (length(new.pkg)) 
     install.packages(new.pkg, dependencies = TRUE)
@@ -28,7 +28,7 @@ sapply(pkg, require, character.only = TRUE)
 
 # usage
 packages <- c("ggplot2", "WGCNA", "pheatmap", "RColorBrewer", "cowplot", "devtools")
-ipak(packages)
+install_pak(packages)
 ```
 
 You can install the development version of OmniCorr like so:
@@ -61,6 +61,13 @@ Similarly, for other types of omics data, different analysis steps are performed
 ***Note:*** Before using the OmniCorr package, it is important to ensure that the row names of the transcriptomics and metagenomics data frames are matching. 
 You can check this by running the command ```table(rownames(Transcriptomics) == rownames(Metagenomics))```. If the result is not all TRUE, then you will need to modify your data frames to ensure that the row names match.
 
+If samples is not is same order, use the `CheckSampleOrder` function below to match and reorder the samples.
+
+```r
+df_list <- CheckSampleOrder(data1 = Transcriptomics , data2 = Metagenomics)
+Transcriptomics <- df_list[[1]]
+Metagenomics <- df_list[[2]]
+```
 ## Steps
 
 The following steps use OmniCorr to integrate transcriptomics and metagenomics data and visualize the results:
