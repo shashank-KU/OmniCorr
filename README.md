@@ -61,10 +61,10 @@ Similarly, for other types of omics data, different analysis steps are performed
 ***Note:*** Before using the OmniCorr package, it is important to ensure that the row names of the transcriptomics and metagenomics data frames are matching. 
 You can check this by running the command ```table(rownames(Transcriptomics) == rownames(Metagenomics))```. If the result is not all TRUE, then you will need to modify your data frames to ensure that the row names match.
 
-If samples is not is same order, use the `CheckSampleOrder` function below to match and reorder the samples.
+If samples is not is same order, use the `CheckSampleOrder` function below to match and reorder the samples. This function takes two data frames, df1 and df2, as inputs, and checks if their rownames match and are in the same order. If the rownames do not match, it reorders the rows of both data frames to match, and then checks again if the rownames match. If they do not match after reordering, it throws an error message. If the rownames match, it returns a list with both data frames in the same order and with matching rownames.
 
 ```r
-df_list <- CheckSampleOrder(data1 = Transcriptomics , data2 = Metagenomics)
+df_list <- CheckSampleOrder(Transcriptomics, Metagenomics)
 Transcriptomics <- df_list[[1]]
 Metagenomics <- df_list[[2]]
 ```
