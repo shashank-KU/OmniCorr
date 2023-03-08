@@ -2,3 +2,4 @@
 
 export(CheckSampleOrder)
 export(calculate_correlations)
+export(metadata)

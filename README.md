@@ -166,6 +166,39 @@ cowplot::plot_grid(result2$gtable,
 
 
 
-### Step 6: Combine the external heatmap of transcriptomics data and the heatmap of correlations
+### Step 6: Integrate the external heatmap
 
+Follow step 3, Use the `calculate_correlations()` function from `OmniCorr` to calculate `Pearson` correlations between the transposed transcriptomics data and the external variables
 
+``` r
+data(metadata)
+all(row.names(metadata) == row.names(Transcriptomics))
+
+result3.2 <- calculate_correlations(df1 = Transcriptomics, df2 = metadata, use = "pairwise.complete.obs", show_significance = "T")
+   
+```
+``` r
+heatmap_colors <- colorRampPalette(rev(RColorBrewer::brewer.pal(n = 6, name ="RdBu")))(51)
+
+result4.2 <- pheatmap::pheatmap(result3.2$correlation, 
+                   color = heatmap_colors, 
+                   treeheight_col = 0, 
+                   treeheight_row = 0,
+                   cluster_rows = dendro,
+                   #cutree_rows = row_cut,
+                   display_numbers = result3.2$signif_matrix, 
+                   breaks = seq(from = -1, to = 1, length.out = 51), 
+                   show_rownames = F, legend = F,
+                   labels_row = paste0(rownames(result3.2$correlation)),
+                   labels_col = paste0(colnames(result3.2$correlation)),
+                   main = paste("Environmental Variables"))
+```
+``` r
+cowplot::plot_grid(result4.2$gtable,
+                   result2$gtable, 
+                   result4$gtable,
+                   result4.1$gtable,
+                   ncol = 4,  align = 'h',
+                   rel_widths = c(1.5, 3.5, 1, 2)) + 
+  ggplot2::theme(plot.margin = ggplot2::unit(c(1,1,1,1), "cm"))
+```

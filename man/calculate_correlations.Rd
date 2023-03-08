@@ -4,7 +4,14 @@
 \alias{calculate_correlations}
 \title{Calculate correlation between two data frames}
 \usage{
-calculate_correlations(df1, df2, method = "pearson", adjust_method = "fdr")
+calculate_correlations(
+  df1,
+  df2,
+  method = "pearson",
+  adjust_method = "fdr",
+  use = "all.obs",
+  show_significance = TRUE
+)
 }
 \arguments{
 \item{df1}{A data frame containing the first set of variables to be correlated. The samples should be in the rows and the MEs in the columns.}
@@ -14,6 +21,12 @@ calculate_correlations(df1, df2, method = "pearson", adjust_method = "fdr")
 \item{method}{(optional) The correlation method to be used. Default is "pearson".}
 
 \item{adjust_method}{(optional) The method for adjusting the p-values for multiple testing. Default is "fdr".}
+
+\item{use}{(optional) A character string specifying the handling of missing data. Default is "all.obs".
+The fast calculations currently support "all.obs" and "pairwise.complete.obs";
+for other options, see R's standard correlation function cor. Abbreviations are allowed.}
+
+\item{show_significance}{(optional) A logical indicating whether to show significance levels as stars or as p-value and correlation value. Default is TRUE (show stars).}
 }
 \value{
 A list containing the correlation results
@@ -25,6 +38,8 @@ $p_value Matrix of p-values for the correlation coefficients.
 $p_value_adj Matrix of adjusted p-values for the correlation coefficients.
 
 $signif_matrix Matrix indicating the significance level of the correlations.
+If show_significance is TRUE, the significance level is shown as stars;
+otherwise, it is shown as the p-value and correlation value.
 }
 \description{
 This function calculates the correlation matrix between the columns of two data frames.
