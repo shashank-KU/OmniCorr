@@ -202,3 +202,4 @@ cowplot::plot_grid(result4.2$gtable,
                    rel_widths = c(1.5, 3.5, 1, 2)) + 
   ggplot2::theme(plot.margin = ggplot2::unit(c(1,1,1,1), "cm"))
 ```
+![Rplot01](https://user-images.githubusercontent.com/30895959/223760509-8c3d8f8e-d232-4c0c-8832-9aa4c1ecf5d9.png)
