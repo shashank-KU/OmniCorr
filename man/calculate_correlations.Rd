@@ -10,7 +10,7 @@ calculate_correlations(
   method = "pearson",
   adjust_method = "fdr",
   use = "all.obs",
-  show_significance = TRUE
+  show_significance = "stars"
 )
 }
 \arguments{
@@ -26,7 +26,8 @@ calculate_correlations(
 The fast calculations currently support "all.obs" and "pairwise.complete.obs";
 for other options, see R's standard correlation function cor. Abbreviations are allowed.}
 
-\item{show_significance}{(optional) A logical indicating whether to show significance levels as stars or as p-value and correlation value. Default is TRUE (show stars).}
+\item{show_significance}{(optional) A character string indicating whether to show significance levels as stars, p-values or correlation values. Default is "stars".
+Possible values are "stars", "p_value" or "correlation".}
 }
 \value{
 A list containing the correlation results
@@ -38,14 +39,15 @@ $p_value Matrix of p-values for the correlation coefficients.
 $p_value_adj Matrix of adjusted p-values for the correlation coefficients.
 
 $signif_matrix Matrix indicating the significance level of the correlations.
-If show_significance is TRUE, the significance level is shown as stars;
-otherwise, it is shown as the p-value and correlation value.
+If show_significance is "stars", the significance level is shown as stars;
+if show_significance is "p_value", the significance level is shown as p-value;
+if show_significance is "correlation", the significance level is shown as the correlation value.
 }
 \description{
 This function calculates the correlation matrix between the columns of two data frames.
 }
 \examples{
-# Calculate correlation between two data frames using default parameters
-result_list <- calculate_correlations(df1 = Transcriptomics, df2 = Metagenomics)
+# Calculate correlation between two data frames using default parameters and show significance level as p-value
+result_list <- calculate_correlations(df1 = Transcriptomics, df2 = Metagenomics, show_significance = "p_value")
 
 }
