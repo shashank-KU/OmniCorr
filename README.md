@@ -202,7 +202,8 @@ cowplot::plot_grid(result4.2$gtable, # External heatmap correlation
                    result2$gtable,  # Transcriptomics heatmap correlation
                    result4$gtable,  # Metagenomics heatmap correlation
                    result4.1$gtable,  # Metatranscriptomics heatmap correlation
-                   ncol = 4,  align = 'h',
+                   ncol = 4, # change this based upon the number of omics heatmap
+                   align = 'h',
                    rel_widths = c(1.5, 3.5, 1, 2)) + 
                    ggplot2::theme(plot.margin = ggplot2::unit(c(1,1,1,1), "cm"))
 ```
