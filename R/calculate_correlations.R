@@ -29,7 +29,7 @@
 #' @export
 calculate_correlations <- function(df1, df2, method = "pearson", adjust_method = "fdr", use = "all.obs", show_significance = "stars") {
   # Calculate correlation matrix
-  cor_mat <- cor(df1, df2, method = method, use = use)
+  cor_mat <- WGCNA::cor(df1, df2, method = method, use = use)
 
   # Calculate p-values and adjust for multiple testing
   p_val_mat <- matrix(ncol = ncol(df2), nrow = ncol(df1),

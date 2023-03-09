@@ -89,7 +89,7 @@ Create a data frame from the transposed data using `data.frame()`
 Generate a heatmap of the data using `pheatmap()` with the dendrogram from Step 1 and no column tree
 
 ``` r
-result2 <- pheatmap(t(Transcriptomics), 
+result2 <- pheatmap::pheatmap(t(Transcriptomics), 
                    cluster_rows = dendro, 
                    cluster_cols = F, 
                    show_rownames = F, 
