@@ -155,7 +155,7 @@ cowplot::plot_grid(result2$gtable,
                    result4.1$gtable,
                    ncol = 3,  align = 'h',
                    rel_widths = c(3, 1, 2)) + 
-  ggplot2::theme(plot.margin = ggplot2::unit(c(1,1,1,1), "cm"))
+                   ggplot2::theme(plot.margin = ggplot2::unit(c(1,1,1,1), "cm"))
 ```
 
 ![Omics Integration](https://user-images.githubusercontent.com/30895959/223124413-71981e48-a295-48cd-959a-8aec5e15d863.png)
@@ -199,6 +199,6 @@ cowplot::plot_grid(result4.2$gtable, # External heatmap correlation
                    result4.1$gtable,  # Metatranscriptomics heatmap correlation
                    ncol = 4,  align = 'h',
                    rel_widths = c(1.5, 3.5, 1, 2)) + 
-  ggplot2::theme(plot.margin = ggplot2::unit(c(1,1,1,1), "cm"))
+                   ggplot2::theme(plot.margin = ggplot2::unit(c(1,1,1,1), "cm"))
 ```
 ![Rplot01](https://user-images.githubusercontent.com/30895959/223760509-8c3d8f8e-d232-4c0c-8832-9aa4c1ecf5d9.png)
