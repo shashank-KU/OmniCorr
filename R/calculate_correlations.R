@@ -3,8 +3,8 @@
 #' @description
 #' This function calculates the correlation matrix between the columns of two data frames.
 #'
-#' @param df1 A data frame containing the first set of variables to be correlated. The samples should be in the rows and the MEs in the columns.
-#' @param df2 A data frame containing the second set of variables to be correlated. The samples should be in the rows and the MEs in the columns.
+#' @param df1 A data frame containing the first set of variables to be correlated. The samples should be in the rows and the Genes/Proteins/Metabolites/ASVs in the columns.
+#' @param df2 A data frame containing the second set of variables to be correlated. The samples should be in the rows and the Genes/Proteins/Metabolites/ASVs in the columns.
 #' @param method (optional) The correlation method to be used. Default is "pearson".
 #' @param adjust_method (optional) The method for adjusting the p-values for multiple testing. Default is "fdr".
 #' @param use (optional) A character string specifying the handling of missing data. Default is "all.obs".
