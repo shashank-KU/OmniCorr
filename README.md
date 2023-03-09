@@ -172,7 +172,7 @@ all(row.names(metadata) == row.names(Transcriptomics))
 
 result3.2 <- calculate_correlations(df1 = Transcriptomics, 
                                     df2 = metadata, 
-                                    use = "pairwise.complete.obs", 
+                                    use = "pairwise.complete.obs", # default is "all.obs"
                                     show_significance = "stars")
    
 ```
