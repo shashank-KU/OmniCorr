@@ -174,7 +174,10 @@ Follow step 3, Use the `calculate_correlations()` function from `OmniCorr` to ca
 data(metadata)
 all(row.names(metadata) == row.names(Transcriptomics))
 
-result3.2 <- calculate_correlations(df1 = Transcriptomics, df2 = metadata, use = "pairwise.complete.obs", show_significance = "T")
+result3.2 <- calculate_correlations(df1 = Transcriptomics, 
+                                    df2 = metadata, 
+                                    use = "pairwise.complete.obs", 
+                                    show_significance = "stars")
    
 ```
 ``` r
