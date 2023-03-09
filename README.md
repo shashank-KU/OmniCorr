@@ -164,7 +164,7 @@ cowplot::plot_grid(result2$gtable,
 
 ### Step 6: Integrate the external heatmap
 
-Follow step 3, Use the `calculate_correlations()` function from `OmniCorr` to calculate `Pearson` correlations between the transposed transcriptomics data and the external variables
+Follow step 3, Use the `calculate_correlations()` function from `OmniCorr` to calculate `Pearson` correlations between the transposed transcriptomics data and the external variables. The metadata used in this package is an example data frame that contains information about the samples used in the study. It includes 14 variables, such as body weight, length, sex, gut condition, bleeding, fat and liver scores, and hepatosomatic and cardiosomatic indices.
 
 ``` r
 data(metadata)
