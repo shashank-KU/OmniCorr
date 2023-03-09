@@ -98,12 +98,16 @@ Use the `calculate_correlations()` function from `OmniCorr` to calculate `Pearso
 
 ``` r
 result3 <- calculate_correlations(df1 = Transcriptomics, 
-                                 df2 = Metagenomics)
+                                 df2 = Metagenomics,
+                                 show_significance = "stars" # Possible other values are "p_value" or "correlation"
+                                 )
 ```
 Use the `calculate_correlations()` function from `OmniCorr` to calculate `Pearson` correlations between the transposed transcriptomics data and the metatranscriptomics data
 ``` r
 result3.1 <- calculate_correlations(df1 = Transcriptomics, 
-                                 df2 = Metatranscriptomics)
+                                 df2 = Metatranscriptomics,
+                                 show_significance = "stars" # Possible other values are "p_value" or "correlation"
+                                 )
 ```
 
 ### Step 4: Generate a heatmap of the correlations between transcriptomics with metagenomics and metatranscriptomics data
@@ -173,7 +177,8 @@ all(row.names(metadata) == row.names(Transcriptomics))
 result3.2 <- calculate_correlations(df1 = Transcriptomics, 
                                     df2 = metadata, 
                                     use = "pairwise.complete.obs", # default is "all.obs"
-                                    show_significance = "stars")
+                                    show_significance = "stars" # Possible other values are "p_value" or "correlation"
+                                    )
    
 ```
 ``` r
