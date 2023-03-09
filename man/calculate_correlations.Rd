@@ -14,9 +14,9 @@ calculate_correlations(
 )
 }
 \arguments{
-\item{df1}{A data frame containing the first set of variables to be correlated. The samples should be in the rows and the MEs in the columns.}
+\item{df1}{A data frame containing the first set of variables to be correlated. The samples should be in the rows and the Genes/Proteins/Metabolites/ASVs in the columns.}
 
-\item{df2}{A data frame containing the second set of variables to be correlated. The samples should be in the rows and the MEs in the columns.}
+\item{df2}{A data frame containing the second set of variables to be correlated. The samples should be in the rows and the Genes/Proteins/Metabolites/ASVs in the columns.}
 
 \item{method}{(optional) The correlation method to be used. Default is "pearson".}
 
