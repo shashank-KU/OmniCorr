@@ -31,7 +31,7 @@ packages <- c("ggplot2", "WGCNA", "pheatmap", "RColorBrewer", "cowplot", "devtoo
 install_pak(packages)
 ```
 
-You can install the development version of OmniCorr like so:
+You can install the development version of OmniCorr:
 
 ``` r
 devtools::install_github("shashank-KU/OmniCorr")
