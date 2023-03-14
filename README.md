@@ -37,6 +37,15 @@ You can install the development version of OmniCorr:
 devtools::install_github("shashank-KU/OmniCorr")
 ```
 
+### Alternate installation for Linux (without devtools)
+
+```r
+wget https://github.com/shashank-KU/OmniCorr/archive/refs/heads/master.zip
+unzip master.zip
+mv OmniCorr-master/ OmniCorr
+R CMD INSTALL OmniCorr
+```
+
 ### Load libraries
 ``` r
 library(OmniCorr)
