@@ -5,12 +5,12 @@
 #'
 #' @param df1 A data frame containing the first set of variables to be correlated. The samples should be in the rows and the Genes/Proteins/Metabolites/ASVs in the columns.
 #' @param df2 A data frame containing the second set of variables to be correlated. The samples should be in the rows and the Genes/Proteins/Metabolites/ASVs in the columns.
-#' @param method (optional) The correlation method to be used. Default is "pearson".
+#' @param method (optional) The correlation method to be used. Default is "pearson". Other options include "spearman" and "kendall".
 #' @param adjust_method (optional) The method for adjusting the p-values for multiple testing. Default is "fdr".
 #' @param use (optional) A character string specifying the handling of missing data. Default is "all.obs".
 #'        The fast calculations currently support "all.obs" and "pairwise.complete.obs";
 #'        for other options, see R's standard correlation function cor. Abbreviations are allowed.
-#' @param show_significance (optional) A character string indicating whether to show significance levels as stars, p-values or correlation values. Default is "stars".
+#' @param show_significance (optional) A character string indicating whether to show significance levels as stars, p-values, or correlation values. Default is "stars".
 #'        Possible values are "stars", "p_value" or "correlation".
 #'
 #' @return A list containing the correlation results
@@ -28,6 +28,12 @@
 #'
 #' @export
 calculate_correlations <- function(df1, df2, method = "pearson", adjust_method = "fdr", use = "all.obs", show_significance = "stars") {
+  # Check if method is valid
+  valid_methods <- c("pearson", "spearman", "kendall")
+  if (!method %in% valid_methods) {
+    stop("Invalid correlation method. Supported methods are: ", paste(valid_methods, collapse = ", "))
+  }
+
   # Calculate correlation matrix
   cor_mat <- WGCNA::cor(df1, df2, method = method, use = use)
 
@@ -78,4 +84,3 @@ calculate_correlations <- function(df1, df2, method = "pearson", adjust_method =
 
   return(results)
 }
-
