@@ -6,7 +6,7 @@
 #' @param df1 A data frame containing the first set of variables to be correlated. The samples should be in the rows and the Genes/Proteins/Metabolites/ASVs in the columns.
 #' @param df2 A data frame containing the second set of variables to be correlated. The samples should be in the rows and the Genes/Proteins/Metabolites/ASVs in the columns.
 #' @param method (optional) The correlation method to be used. Default is "pearson". Other options include "spearman" and "kendall".
-#' @param adjust_method (optional) The method for adjusting the p-values for multiple testing. Default is "fdr".
+#' @param adjust_method (optional) The method for adjusting the p-values for multiple testing. Default is "fdr". If "none", no adjustment is applied.
 #' @param use (optional) A character string specifying the handling of missing data. Default is "all.obs".
 #'        The fast calculations currently support "all.obs" and "pairwise.complete.obs";
 #'        for other options, see R's standard correlation function cor. Abbreviations are allowed.
@@ -16,7 +16,7 @@
 #' @return A list containing the correlation results
 #' @return$correlation Matrix of correlation coefficients.
 #' @return$p_value Matrix of p-values for the correlation coefficients.
-#' @return$p_value_adj Matrix of adjusted p-values for the correlation coefficients.
+#' @return$p_value_adj Matrix of adjusted p-values for the correlation coefficients, or the same as p-value if no adjustment is applied.
 #' @return$signif_matrix Matrix indicating the significance level of the correlations.
 #' If show_significance is "stars", the significance level is shown as stars;
 #' if show_significance is "p_value", the significance level is shown as p-value;
@@ -37,7 +37,7 @@ calculate_correlations <- function(df1, df2, method = "pearson", adjust_method =
   # Calculate correlation matrix
   cor_mat <- WGCNA::cor(df1, df2, method = method, use = use)
 
-  # Calculate p-values and adjust for multiple testing
+  # Calculate p-values
   p_val_mat <- matrix(ncol = ncol(df2), nrow = ncol(df1),
                       dimnames = list(colnames(df1), colnames(df2)))
   corr_val_mat <- p_val_mat
@@ -55,26 +55,31 @@ calculate_correlations <- function(df1, df2, method = "pearson", adjust_method =
     }
   }
 
-  p_val_adj_mat <- p.adjust(p_val_mat, method = adjust_method)
+  # Adjust p-values if the adjust_method is not "none"
+  if (adjust_method != "none") {
+    p_val_adj_mat <- matrix(p.adjust(as.numeric(p_val_mat), method = adjust_method), 
+                            nrow = nrow(p_val_mat), ncol = ncol(p_val_mat), 
+                            dimnames = dimnames(p_val_mat))
+  } else {
+    p_val_adj_mat <- p_val_mat  # No adjustment, return raw p-values
+  }
 
-  # Add significance level.
-  # One star means a p-value of less than 0.05;
-  # Two stars is less than 0.01, and three, is less than 0.001.
+  # Add significance level based on p-values (adjusted or raw)
   signif_matrix <- rep("", length(p_val_mat))
   if (show_significance == "stars") {
-    three_star <- which(p_val_mat <= 0.001)
+    three_star <- which(p_val_adj_mat <= 0.001)
     signif_matrix[three_star] <- "***"
-    two_star <- which((p_val_mat <= 0.01) & (p_val_mat > 0.001))
+    two_star <- which((p_val_adj_mat <= 0.01) & (p_val_adj_mat > 0.001))
     signif_matrix[two_star] <- "**"
-    one_star <- which((p_val_mat <= 0.05) & (p_val_mat > 0.01))
+    one_star <- which((p_val_adj_mat <= 0.05) & (p_val_adj_mat > 0.01))
     signif_matrix[one_star] <- "*"
   } else if (show_significance == "p_value") {
-    signif_matrix <- p_val_mat
+    signif_matrix <- p_val_adj_mat
   } else if (show_significance == "correlation") {
     signif_matrix <- corr_val_mat
   }
 
-  dim(signif_matrix) <- dim(p_val_mat) # Give textMatrix the correct dimensions
+  dim(signif_matrix) <- dim(p_val_mat) # Give signif_matrix the correct dimensions
 
   # Collect all results into a list
   results <- list(p_value = p_val_mat,
