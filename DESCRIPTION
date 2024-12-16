@@ -13,7 +13,6 @@ RoxygenNote: 7.2.3
 Suggests: 
     knitr,
     rmarkdown,
-    testthat (>= 3.0.0)
 VignetteBuilder: knitr
 Imports: 
     cowplot,
@@ -25,7 +24,7 @@ Imports:
     tibble,
     WGCNA
 Depends: 
-    R (>= 2.10)
+    R (>= 3.6)
 LazyData: true
 Config/testthat/edition: 3
 URL: https://github.com/shashank-KU/OmniCorr
