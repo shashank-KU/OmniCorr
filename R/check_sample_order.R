@@ -13,7 +13,7 @@
 #' data1_reordered <- df_list[[1]]
 #' data2_reordered <- df_list[[2]]
 #' @export
-CheckSampleOrder <- function(df1, df2){
+check_sample_order <- function(df1, df2){
   same_order <- all(rownames(df1) == rownames(df2))
   if(!same_order){
     cat("Sample names do not match. Samples will be sorted to match.")
