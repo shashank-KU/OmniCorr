@@ -19,6 +19,13 @@ Install R (version >= 3.6.0) and RStudio (optional)
 check to see if packages are installed. Install them if they are not, then load them into the R session or follow their official installation steps
 
 ```r
+# Install Bioconductor packages
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install(c("impute", "preprocessCore", "GO.db"))
+```
+```r
 install_pak <- function(pkg){
 new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
 if (length(new.pkg)) 
