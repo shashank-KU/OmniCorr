@@ -35,6 +35,7 @@ theme_set(theme_bw())
 ### Load data
 ```{r}
 load("Omnicorr_cow_meta_traits.RData")
+newP_slim <- readRDS("proteomics_slim.rds")
 ```
 
 ##### intro of data
@@ -1408,4 +1409,5 @@ ggsave(paste("all_proteomics_correlation_plots-", names(plot_list)[i],".pdf", se
 ```{r}
 save(meta, combined_MAG_genome, metadata, groups, file = "Omnicorr_cow_meta_traits.RData")
 ```
+
 
