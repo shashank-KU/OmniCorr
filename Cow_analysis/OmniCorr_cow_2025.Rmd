@@ -94,8 +94,12 @@ vsn_fit_W <- vsn2(ipt.metaP_W$ximp)
 meanSdPlot(vsn_fit_W)  
 ```
 
+##### feel free to skip this chunk, for testing purpose only.
+```{r testing include=FALSE}
+rawP_L <- rawP %>%
+  filter(str_detect(source, "L")) %>% 
+  select(protein, sample, intensity) 
 
-```{r include=FALSE}
 matrx.rawP_L2 <-  rawP_L %>% pivot_wider(id_cols = protein, names_from = sample, values_from = intensity) 
 
 imputedL.2 <- matrx.rawP_L2 %>% 
@@ -110,6 +114,10 @@ transformed_data <- exprs(out)
 mean_sd <- function(x) {
   data.frame(mean = mean(x), sd = sd(x))
 }
+
+annoL <- newP_slim %>% 
+  filter(str_detect(timepoint, "T6"))%>% 
+  filter(str_detect(source, "L"))
 
 # Apply the function to the entire transformed data
 meanSdPlot(transformed_data)
@@ -254,10 +262,12 @@ metW <- matching_T6_metW %>%
 
 
 ```{r pca}
+meta <- meta %>%
+rownames_to_column("sample") %>% left_join(data.frame(sample = colnames(ciliates)), by = "sample") %>% column_to_rownames("sample")
 
-meta <- meta %>% 
-  left_join(., data.frame(sample = colnames(ciliates)), by= "sample") %>% 
-  column_to_rownames(var = "sample")
+#meta <- meta %>% 
+#  left_join(., data.frame(sample = colnames(ciliates)), by= "sample") %>% 
+#  column_to_rownames(var = "sample")
   
 ciliates.pca <- prcomp(t(ciliates))$x 
 
@@ -676,12 +686,13 @@ plot(dendro.rows)
 
 ```{r}
 #meta$split <- as.factor(meta$split)
-meta$treatment <- as.factor(meta$treatment)
-meta$breed <- as.factor(meta$breed)
-
-# Chnage colname to capital
-colnames(meta)[colnames(meta) == 'treatment'] <- 'Treatment'
-colnames(meta)[colnames(meta) == 'breed'] <- 'Breed'
+meta <- meta %>%
+  rename(Treatment = treatment,
+         Breed     = breed) %>%
+  mutate(
+    Treatment = as.factor(Treatment),
+    Breed     = as.factor(Breed)
+  )
 
 result2 <- pheatmap::pheatmap(t(Archbac_protmics)[,dendro.cols$order], 
                               cluster_rows = dendro.rows, 
@@ -1409,5 +1420,6 @@ ggsave(paste("all_proteomics_correlation_plots-", names(plot_list)[i],".pdf", se
 ```{r}
 save(meta, combined_MAG_genome, metadata, groups, file = "Omnicorr_cow_meta_traits.RData")
 ```
+
 
 
