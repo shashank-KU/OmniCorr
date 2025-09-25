@@ -781,31 +781,6 @@ result3.2$signif_matrix <- result3.2$signif_matrix[, cols_to_keep]
 # Now the matrices in result3 will contain only columns with p-values < 0.05
 ```
 
-### Step 3.1: Calculate correlations between omics(metaproteomics) data
-
-```{r include = FALSE, eval = FALSE}
-
-result3 <- calculate_correlations(df1 = Proteomics, 
-                                  df2 = Metaproteomics,
-                                  method = "spearson",
-                                  show_significance = "stars" # Possible other values are "p_value" or "correlation"
-)
-
-result3.1 <- calculate_correlations(df1 = Metaproteomics, 
-                                    df2 = Ciliates_protmics,
-                                    method = "spearman",
-                                    show_significance = "stars" # Possible other values are "p_value" or "correlation"
-)
-
-result3.2 <- calculate_correlations(df1 = Metaproteomics, 
-                                    df2 = Fungi_protmics,
-                                    method = "spearman",
-                                    show_significance = "stars" # Possible other values are "p_value" or "correlation"
-)
-
-```
-
-
 ### Step 4: Generate a heatmap of the correlations between the central layer and other layers
 
 ```{r heatmap single matrix}
@@ -1420,6 +1395,7 @@ ggsave(paste("all_proteomics_correlation_plots-", names(plot_list)[i],".pdf", se
 ```{r}
 save(meta, combined_MAG_genome, metadata, groups, file = "Omnicorr_cow_meta_traits.RData")
 ```
+
 
 
 
