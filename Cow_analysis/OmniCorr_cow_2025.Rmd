@@ -866,8 +866,17 @@ meta_cln <- meta %>%
  # filter(sample %in% rownames(Archbac_protmics)) %>%
   #column_to_rownames("sample")
 
+meta_cln <- meta_cln[rownames(Archbac_protmics), ]
+
 all(rownames(meta_cln) == row.names(Archbac_protmics))
 #all(meta$sample == row.names(Proteomics))
+
+# in case original column still "chr", run below again.... 
+meta_cln <- meta_cln %>%
+  mutate(
+    Breed = as.numeric(factor(Breed)),
+    ch4_dmi_binary = as.numeric(factor(ch4_dmi_binary, levels = c("low", "high")))
+  )
 
 result_pheno_H <- calculate_correlations(df1 = Archbac_protmics, 
                                     df2 = meta_cln[rownames(Archbac_protmics),] %>% select(Breed, ch4_dmi_binary), 
@@ -1395,6 +1404,7 @@ ggsave(paste("all_proteomics_correlation_plots-", names(plot_list)[i],".pdf", se
 ```{r}
 save(meta, combined_MAG_genome, metadata, groups, file = "Omnicorr_cow_meta_traits.RData")
 ```
+
 
 
 
