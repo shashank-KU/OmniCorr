@@ -4,11 +4,30 @@
 <!-- badges: start -->
 <!-- badges: end -->
 
-The code provided in this repository can be used as a framework for exploring correlations between different omics datasets, including transcriptomics, metatranscriptomics, metagenomics,metaproteomics, and others. By utilizing packages such as WGCNA, pheatmap, and cowplot, it provides a flexible and customizable way to generate integrated heatmaps and visualize correlations between datasets.
+OmniCorr is an R package–style framework for correlation-based integration and visualization of multi-omics datasets, including transcriptomics, metatranscriptomics, metagenomics, metaproteomics, and associated sample metadata. The framework is designed to facilitate interpretable, feature-level comparison across omics layers and to generate aligned heatmap visualizations highlighting putative cross-omics associations.
 
+OmniCorr focuses on:
+
+1. Computing pairwise correlations between independently processed omics layers
+
+2. Organizing correlation results in a reproducible data structure
+
+3. Visualizing correlations using aligned, hierarchical heatmaps
+
+OmniCorr is **not a preprocessing or network inference pipeline**. Instead, it assumes that each omics layer has already been processed using appropriate domain-specific workflows (e.g. WGCNA for transcriptomics). This design ensures flexibility and interoperability with existing bioinformatics pipelines.
 With some modifications to the input datasets, this code can be adapted to work with different omics data types. For example, in Step 3, users can substitute in their own data frames to calculate correlations between different datasets. Additionally, the color schemes used in the heatmaps can be adjusted to best suit the user's data.
 
-Overall, this code provides a powerful tool for exploring correlations between different omics datasets, and can be adapted to work with a wide range of data types.
+
+## Scope and assumptions
+Before using OmniCorr, users should ensure that:
+
+- Each omics dataset has been independently preprocessed
+
+- Samples are matched across datasets
+
+- Input matrices are numeric with samples as rows and features as columns
+
+- Feature-level summaries (e.g. hub genes, pathways, taxa) are provided as input
 
 ## Installation
 
@@ -16,8 +35,7 @@ Install R (version >= 3.6.0) and RStudio (optional)
 
 ### Dependencies
 
-check to see if packages are installed. Install them if they are not, then load them into the R session or follow their official installation steps
-
+Some dependencies are available via Bioconductor:
 ```r
 # Install Bioconductor packages
 if (!require("BiocManager", quietly = TRUE))
@@ -25,6 +43,7 @@ if (!require("BiocManager", quietly = TRUE))
 
 BiocManager::install(c("impute", "preprocessCore", "GO.db"))
 ```
+Install required CRAN packages:
 ```r
 install_pak <- function(pkg){
 new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
@@ -32,19 +51,16 @@ if (length(new.pkg))
     install.packages(new.pkg, dependencies = TRUE)
 sapply(pkg, require, character.only = TRUE)
 }
-
-# usage
 packages <- c("ggplot2", "WGCNA", "pheatmap", "RColorBrewer", "cowplot", "devtools")
 install_pak(packages)
 ```
 
-You can install the development version of OmniCorr:
-
+### Install OmniCorr (development version)
 ``` r
 devtools::install_github("shashank-KU/OmniCorr")
 ```
 
-### Alternate installation for Linux (without devtools)
+### Alternative installation (Linux, without devtools)
 
 ```r
 wget https://github.com/shashank-KU/OmniCorr/archive/refs/heads/master.zip
@@ -53,113 +69,116 @@ mv OmniCorr-master/ OmniCorr
 R CMD INSTALL OmniCorr
 ```
 
-### Load libraries
+### Load package and example data
 ``` r
 library(OmniCorr)
-```
-
-### Load example datasets
-``` r
 data(Metagenomics)
 data(Transcriptomics)
 data(Metatranscriptomics)
 ```
+## Input data provenance
+The example datasets included in OmniCorr are derived from typical upstream omics analysis workflows.
 
-The input data for this package comes from the output of various analysis steps performed on different types of omics data such as transcriptomics, metatranscriptomics, metagenomics, proteomics, etc. For example, in the case of metatranscriptomics, the input data is generated from the output of the `blockwiseModules` function of the `WGCNA` package, which performs a network analysis of gene expression data to identify gene modules. The `chooseTopHubInEachModule` function is then used to identify the top hub genes in each module. The resulting data is stored in a list called Metatranscriptomics, which contains information about the identified modules and top hub genes.
+### Example: metatranscriptomics
+Metatranscriptomics input is generated from:
 
-Similarly, for other types of omics data, different analysis steps are performed to generate input data for the package. For example, in the case of metagenomics, the input data may be generated from the output of functional annotation and pathway analysis tools. The specific analysis steps and tools used may vary depending on the type of omics data being analyzed.
+- `blockwiseModules()` (WGCNA) for module detection
+
+- `chooseTopHubInEachModule()` for hub feature selection
+The resulting object contains module-level summaries and representative hub features.
+Other omics layers (e.g. metagenomics) may originate from functional annotation or pathway profiling pipelines. OmniCorr does not enforce a specific preprocessing strategy.
 
 
-***Note:*** Before using the OmniCorr package, it is important to ensure that the row names of the transcriptomics and metagenomics data frames are matching. 
-You can check this by running the command ```table(rownames(Transcriptomics) == rownames(Metagenomics))```. If the result is not all TRUE, then you will need to modify your data frames to ensure that the row names match.
+## Sample matching and ordering (required)
+All datasets **must contain identical samples in the same order**.
 
-If samples is not is same order, use the `CheckSampleOrder` function below to match and reorder the samples. This function takes two data frames, df1 and df2, as inputs, and checks if their rownames match and are in the same order. If the rownames do not match, it reorders the rows of both data frames to match, and then checks again if the rownames match. If they do not match after reordering, it throws an error message. If the rownames match, it returns a list with both data frames in the same order and with matching rownames.
+Check sample alignment:
+```table(rownames(Transcriptomics) == rownames(Metagenomics))```
 
+If sample order differs, use the helper function:
 ```r
 df_list <- CheckSampleOrder(Transcriptomics, Metagenomics)
 Transcriptomics <- df_list[[1]]
 Metagenomics <- df_list[[2]]
 ```
-## Steps
+## Core workflow
+### Step 1: Feature clustering (reference layer)
 
-The following steps use OmniCorr to integrate transcriptomics and metagenomics data and visualize the results:
-
-### Step 1: Perform hierarchical clustering of transcriptomics data using `WGCNA`
-
-Load the WGCNA package in R
-Calculate the bicorrelation matrix of transcriptomics data with outlier removal using the `bicor()` function
-Convert the matrix to a distance matrix using `as.dist()`
-Perform hierarchical clustering on the distance matrix using `hclust()` with `ward.D2` method
+The following steps use OmniCorr to integrate transcriptomics and metagenomics data and visualize the results. First perform hierarchical clustering of transcriptomics
 
 ``` r
 dendro <- hclust(as.dist(1 - WGCNA::bicor(Transcriptomics, maxPOutliers = 0.05)), method = "ward.D2")
 ```
-### Step 2: Generate a heatmap of transcriptomics data with dendrogram
 
-Transpose the transcriptomics data using `t()`
-Create a data frame from the transposed data using `data.frame()`
-Generate a heatmap of the data using `pheatmap()` with the dendrogram from Step 1 and no column tree
+### Step 2: Transcriptomics heatmap
 
 ``` r
-result2 <- pheatmap::pheatmap(t(Transcriptomics), 
-                   cluster_rows = dendro, 
-                   cluster_cols = F, 
-                   show_rownames = F, 
-                   main = paste("Transcriptomics"))
+tx_heatmap <- pheatmap::pheatmap(
+  t(Transcriptomics),
+  cluster_rows = dendro,
+  cluster_cols = FALSE,
+  show_rownames = FALSE,
+  main = "Transcriptomics"
+)
 ```
 
-### Step 3: Calculate correlations between omics data
+This heatmap provides the structural backbone for aligning downstream correlation heatmaps.
+
+### Step 3: Cross-omics correlation analysis
 
 Use the `calculate_correlations()` function from `OmniCorr` to calculate `Pearson` correlations between the transposed transcriptomics data and the metagenomics data
 
 ``` r
-result3 <- calculate_correlations(df1 = Transcriptomics, 
-                                 df2 = Metagenomics,
-                                 show_significance = "stars" # Possible other values are "p_value" or "correlation"
-                                 )
-```
-Use the `calculate_correlations()` function from `OmniCorr` to calculate `Pearson` correlations between the transposed transcriptomics data and the metatranscriptomics data
-``` r
-result3.1 <- calculate_correlations(df1 = Transcriptomics, 
-                                 df2 = Metatranscriptomics,
-                                 show_significance = "stars" # Possible other values are "p_value" or "correlation"
-                                 )
+corr_mg <- calculate_correlations(
+  df1 = Transcriptomics,
+  df2 = Metagenomics,
+  show_significance = "stars"
+)
+corr_mt <- calculate_correlations(
+  df1 = Transcriptomics,
+  df2 = Metatranscriptomics,
+  show_significance = "stars"
+)
 ```
 
-### Step 4: Generate a heatmap of the correlations between transcriptomics with metagenomics and metatranscriptomics data
+Each call returns:
+
+- correlation matrix
+
+- p-values
+
+- significance annotations
+
+### Step 4: Correlation heatmaps
 
 Create a color ramp for the heatmap using `colorRampPalette()`
 Generate a heatmap of the correlations using `pheatmap()` with the dendrogram from [Step 1](https://github.com/shashank-KU/OmniCorr#step-1-perform-hierarchical-clustering-of-transcriptomics-data-using-wgcna), the color ramp, and no row tree
 Add significant correlations to the heatmap using the display_numbers parameter from `pheatmap()`
 
 ``` r
-heatmap_colors <- colorRampPalette(rev(RColorBrewer::brewer.pal(n = 6, name ="RdBu")))(51)
+heatmap_colors <- colorRampPalette(
+  rev(RColorBrewer::brewer.pal(6, "RdBu"))
+)(51)
 
-result4 <- pheatmap::pheatmap(result3$correlation, 
-                   color = heatmap_colors, 
-                   treeheight_col = 0, 
-                   treeheight_row = 0,
-                   cluster_rows = dendro,
-                   #cutree_rows = row_cut,
-                   display_numbers = result3$signif_matrix, 
-                   breaks = seq(from = -1, to = 1, length.out = 51), 
-                   show_rownames = F, legend = F,
-                   labels_row = paste0(rownames(result3$correlation)),
-                   labels_col = paste0(colnames(result3$correlation)),
-                   main = paste("Metagenomics"))
+hm_mg <- pheatmap::pheatmap(
+  corr_mg$correlation,
+  color = heatmap_colors,
+  cluster_rows = dendro,
+  display_numbers = corr_mg$signif_matrix,
+  breaks = seq(-1, 1, length.out = 51),
+  show_rownames = FALSE,
+  legend = FALSE,
+  main = "Metagenomics")
 
-result4.1 <- pheatmap::pheatmap(result3.1$correlation, 
-                   color = heatmap_colors, 
-                   treeheight_col = 0, 
-                   treeheight_row = 0,
-                   cluster_rows = dendro,
-                   #cutree_rows = row_cut,
-                   display_numbers = result3.1$signif_matrix, 
-                   breaks = seq(from = -1, to = 1, length.out = 51), 
-                   show_rownames = T, legend = T,
-                   labels_row = paste0(rownames(result3.1$correlation)),
-                   labels_col = paste0(colnames(result3.1$correlation)),
-                   main = paste("Metatranscriptomics"))
+hm_mt <- pheatmap::pheatmap(
+  corr_mt$correlation,
+  color = heatmap_colors,
+  cluster_rows = dendro,
+  display_numbers = corr_mt$signif_matrix,
+  breaks = seq(-1, 1, length.out = 51),
+  show_rownames = TRUE,
+  legend = TRUE,
+  main = "Metatranscriptomics")
 ```
 
 ### Step 5: Combine the heatmap of transcriptomics data and the heatmap of correlations
@@ -170,12 +189,18 @@ Adjust the margins of the plot using `ggplot2::theme()` with the `plot.margin` p
 
 
 ``` r
-cowplot::plot_grid(result2$gtable, 
-                   result4$gtable,
-                   result4.1$gtable,
-                   ncol = 3,  align = 'h',
-                   rel_widths = c(3, 1, 2)) + 
-                   ggplot2::theme(plot.margin = ggplot2::unit(c(1,1,1,1), "cm"))
+cowplot::plot_grid(
+  tx_heatmap$gtable,
+  hm_mg$gtable,
+  hm_mt$gtable,
+  ncol = 3,
+  align = "h",
+  rel_widths = c(3, 1, 2)
+) +
+ggplot2::theme(
+  plot.margin = ggplot2::unit(c(1,1,1,1), "cm")
+)
+
 ```
 
 ![Omics Integration](https://user-images.githubusercontent.com/30895959/223124413-71981e48-a295-48cd-959a-8aec5e15d863.png)
@@ -184,43 +209,38 @@ cowplot::plot_grid(result2$gtable,
 
 ### Step 6: Integrate the external heatmap
 
-Follow step 3, Use the `calculate_correlations()` function from `OmniCorr` to calculate `Pearson` correlations between the transposed transcriptomics data and the external variables. The metadata used in this package is an example data frame that contains information about the samples used in the study. It includes 14 variables, such as body weight, length, sex, gut condition, bleeding, fat and liver scores, and hepatosomatic and cardiosomatic indices.
+OmniCorr can correlate omics features with phenotypic or environmental variables.
 
 ``` r
 data(metadata)
 all(row.names(metadata) == row.names(Transcriptomics))
 
-result3.2 <- calculate_correlations(df1 = Transcriptomics, 
-                                    df2 = metadata, 
-                                    use = "pairwise.complete.obs", # default is "all.obs"
-                                    show_significance = "stars" # Possible other values are "p_value" or "correlation"
-                                    )
-   
+corr_meta <- calculate_correlations(
+  df1 = Transcriptomics,
+  df2 = metadata,
+  use = "pairwise.complete.obs", # default is "all.obs"
+  show_significance = "stars" # Possible other values are "p_value" or "correlation"
+)
 ```
 ``` r
-heatmap_colors <- colorRampPalette(rev(RColorBrewer::brewer.pal(n = 6, name ="RdBu")))(51)
-
-result4.2 <- pheatmap::pheatmap(result3.2$correlation, 
-                   color = heatmap_colors, 
-                   treeheight_col = 0, 
-                   treeheight_row = 0,
-                   cluster_rows = dendro,
-                   #cutree_rows = row_cut,
-                   display_numbers = result3.2$signif_matrix, 
-                   breaks = seq(from = -1, to = 1, length.out = 51), 
-                   show_rownames = F, legend = F,
-                   labels_row = paste0(rownames(result3.2$correlation)),
-                   labels_col = paste0(colnames(result3.2$correlation)),
-                   main = paste("Environmental Variables"))
+hm_meta <- pheatmap::pheatmap(
+  corr_meta$correlation,
+  color = heatmap_colors,
+  cluster_rows = dendro,
+  display_numbers = corr_meta$signif_matrix,
+  breaks = seq(-1, 1, length.out = 51),
+  show_rownames = FALSE,
+  legend = FALSE,
+  main = "Environmental Variables")
 ```
 ``` r
-cowplot::plot_grid(result4.2$gtable, # External heatmap correlation
-                   result2$gtable,  # Transcriptomics heatmap correlation
-                   result4$gtable,  # Metagenomics heatmap correlation
-                   result4.1$gtable,  # Metatranscriptomics heatmap correlation
-                   ncol = 4, # change this based upon the number of omics heatmap
-                   align = 'h',
-                   rel_widths = c(1.5, 3.5, 1, 2)) + 
-                   ggplot2::theme(plot.margin = ggplot2::unit(c(1,1,1,1), "cm"))
+cowplot::plot_grid(
+  hm_meta$gtable, # External heatmap correlation
+  tx_heatmap$gtable, # Transcriptomics heatmap correlation
+  hm_mg$gtable, # Metagenomics heatmap correlation
+  hm_mt$gtable, # Metatranscriptomics heatmap correlation
+  ncol = 4,
+  align = "h",
+  rel_widths = c(1.5, 3.5, 1, 2))
 ```
 ![Rplot01](https://user-images.githubusercontent.com/30895959/223760509-8c3d8f8e-d232-4c0c-8832-9aa4c1ecf5d9.png)
