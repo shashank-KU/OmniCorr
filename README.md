@@ -181,7 +181,7 @@ hm_mt <- pheatmap::pheatmap(
   main = "Metatranscriptomics")
 ```
 
-### Step 5: Combine the heatmap of transcriptomics data and the heatmap of correlations
+### Optional downstream visualization (recommended, not required)
 
 Use the `plot_grid()` function from the cowplot package to combine the two heatmaps into a single figure with two columns
 Set the relative widths of the two columns using the `rel_widths` parameter
@@ -207,7 +207,7 @@ ggplot2::theme(
 
 
 
-### Step 6: Integrate the external heatmap
+### Step 5: Integrate the external heatmap
 
 OmniCorr can correlate omics features with phenotypic or environmental variables.
 
