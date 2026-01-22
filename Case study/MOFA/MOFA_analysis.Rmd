@@ -1,0 +1,794 @@
+---
+title: "MOFA analysis"
+author: "Veronica Quarato"
+date: '`r format(Sys.time(), "%d.%m.%Y")`'
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: yeti
+    code_folding: hide
+    number_sections: false
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(stringsAsFactors = FALSE)
+
+library(tidyverse)
+library(dplyr)
+library(data.table)
+library(purrr)
+library(ggplot2)
+library(ggpubr)
+library(MOFA2)
+library(basilisk)
+library(basilisk.utils)
+library(reticulate)
+library(readr)
+
+theme_set(theme_bw())
+```
+
+## Load packages
+
+```{r}
+library(tidyverse)
+library(dplyr)
+library(data.table)
+library(purrr)
+library(ggplot2)
+library(ggpubr)
+library(MOFA2)
+library(basilisk)
+library(basilisk.utils)
+library(reticulate)
+library(readr)
+```
+
+## Import data
+
+```{r}
+# Load metadata
+metadata <- read.csv("meta.csv", row.names = 1, check.names = FALSE)
+
+# Load annotations
+annotation_ciliates <- read_csv("annotation_ciliates.csv")
+annotation_fungi <- read_csv("annotation_fungi.csv")
+annotation_metazoa <- read_csv("annotation_metazoa.csv")
+
+# Load abundance matrices
+ciliates_df <- read.csv("ciliates.csv", row.names = 1, check.names = FALSE)
+fungi_df <- read.csv("fungi.csv", row.names = 1, check.names = FALSE)
+archbac_df <- read.csv("archbac.csv", row.names = 1, check.names = FALSE)
+metazoa_df <- read.csv("metazoa.csv", row.names = 1, check.names = FALSE)
+metL_df <- read.csv("metL.csv", row.names = 1, check.names = FALSE)
+metW_df <- read.csv("metW.csv", row.names = 1, check.names = FALSE)
+```
+
+## Prepare MOFA inputs
+
+```{r, fig.width=10, fig.height=8, out.width="90%"}
+# Convert wide -> long
+ciliates <- ciliates_df %>%
+  rownames_to_column(var = "feature") %>%
+  pivot_longer(
+    cols = -feature,
+    names_to = "sample",
+    values_to = "value"
+  ) %>%
+  mutate(view = "Ciliates") %>%
+  dplyr::select(sample, feature, value, view)   # reorder columns
+
+fungi <- fungi_df %>%
+  rownames_to_column(var = "feature") %>%
+  pivot_longer(
+    cols = -feature,
+    names_to = "sample",
+    values_to = "value"
+  ) %>%
+  mutate(view = "Fungi") %>%
+  dplyr::select(sample, feature, value, view)
+
+archbac <- archbac_df %>%
+  rownames_to_column(var = "feature") %>%
+  pivot_longer(
+    cols = -feature,
+    names_to = "sample",
+    values_to = "value"
+  ) %>%
+  mutate(view = "Archaea & Bacteria") %>%
+  dplyr::select(sample, feature, value, view)
+
+metazoa <- metazoa_df %>%
+  rownames_to_column(var = "feature") %>%
+  pivot_longer(
+    cols = -feature,
+    names_to = "sample",
+    values_to = "value"
+  ) %>%
+  mutate(view = "Host (Digesta Fluid)") %>%
+  dplyr::select(sample, feature, value, view)
+
+metL <- metL_df %>%
+  rownames_to_column(var = "feature") %>%
+  pivot_longer(
+    cols = -feature,
+    names_to = "sample",
+    values_to = "value"
+  ) %>%
+  mutate(view = "Host (Liver)") %>%
+  dplyr::select(sample, feature, value, view)
+
+metW <- metW_df %>%
+  rownames_to_column(var = "feature") %>%
+  pivot_longer(
+    cols = -feature,
+    names_to = "sample",
+    values_to = "value"
+  ) %>%
+  mutate(view = "Host (Digesta Wall)") %>%
+  dplyr::select(sample, feature, value, view)
+
+dt <- bind_rows(ciliates, fungi, archbac, metazoa, metL, metW)
+
+head(dt,n=3)
+
+# Views names
+unique(dt$view)
+
+# Number of samples
+length(unique(dt$sample))
+
+# Number of unique features per view
+dt %>%
+  group_by(view) %>%
+  summarise(n_features = n_distinct(feature))
+
+ggdensity(dt, x="value", fill="gray70") +
+  facet_wrap(~view, nrow=1, scales="free")
+
+colnames(metadata)
+```
+
+## Train the model
+
+```{r, fig.width=10, fig.height=8, out.width="90%"}
+# Create MOFA object
+mofa <- create_mofa(dt)
+mofa
+
+# Visualize data structure
+plot_data_overview(mofa)
+
+# Prepare MOFA object
+# use all default options, with K=10 factors
+model_opts <- get_default_model_options(mofa)
+model_opts$num_factors <- 10
+
+mofa <- prepare_mofa(mofa, model_options = model_opts)
+
+# Train the model
+reticulate::py_install("mofapy2", pip = TRUE)
+reticulate::py_module_available("mofapy2")
+
+mofa <- run_mofa(mofa, use_basilisk = FALSE)
+saveRDS(mofa, file = "mofa_trained.rds")
+```
+
+### Check total number of features (proteins) used in the MOFA model
+```{r}
+# Number of features per view
+dt %>%
+  group_by(view) %>%
+  summarise(n_features = n_distinct(feature))
+
+# Total number of features used in MOFA
+n_features_total <- n_distinct(dt$feature)
+
+n_features_total
+```
+
+MOFA uses 22797 unique features.
+
+```{r}
+# Add sample metadata to the model
+metadata$sample <- rownames(metadata)   # if sample IDs are in rownames
+metadata <- metadata %>%
+  relocate(sample, .before = 1)   # put sample column first
+samples_metadata(mofa) <- metadata
+
+colnames(samples_metadata(mofa))
+head(samples_metadata(mofa))
+```
+
+## Downstream analysis
+
+```{r, fig.width=10, fig.height=8, out.width="90%"}
+# Variance decomposition
+plot_variance_explained(mofa, plot_total = T)[[2]]
+
+plot_variance_explained(mofa, max_r2=15)
+
+# plot the cumulative variance explained per view
+r2 <- mofa@cache$variance_explained$r2_per_factor[[1]]
+
+r2.dt <- r2 %>%
+  as.data.table %>% .[,factor:=as.factor(1:mofa@dimensions$K)] %>%
+  melt(id.vars=c("factor"), variable.name="view", value.name = "r2") %>%
+  .[,cum_r2:=cumsum(r2), by="view"]
+
+ggline(r2.dt, x="factor", y="cum_r2", color="view") +
+  labs(x="Factor number", y="Cumulative variance explained (%)") +
+  theme(
+    legend.title = element_blank(), 
+    legend.position = "top",
+    axis.text = element_text(size=rel(0.8))
+  )
+```
+
+```{r, fig.width=10, fig.height=8, out.width="90%"}
+# Visualize the MOFA Factors
+treatment.colors <- c("control" = "steelblue", "treatment" = "tomato")
+
+p <- plot_factors(mofa,
+                  factors = c(1,3),
+                  color_by = "Treatment",
+                  dot_size = 4
+) + scale_color_manual(values = treatment.colors)
+
+p + 
+  # geom_density_2d(aes_string(color="color_by")) +
+  stat_ellipse(aes(color=color_by), geom = "polygon", alpha=0.25) +
+  scale_color_manual(values = treatment.colors)
+```
+
+## Characterisation of Factor 3
+
+```{r, fig.width=10, fig.height=8, out.width="90%"}
+# Factor values
+plot_factor(mofa, 
+            factor = 3, 
+            color_by = "Treatment", 
+            dot_size = 4,
+            dodge = TRUE,
+            stroke = 0.4,
+            add_violin = T,
+            add_boxplot = T
+) +
+  scale_fill_manual(values=treatment.colors) +
+  theme(
+    axis.text.x = element_blank(),
+    axis.ticks.x = element_blank()
+  )
+```
+
+```{r, fig.width=10, fig.height=8, out.width="90%"}
+# Plot Weights
+plot_top_weights(mofa, factor = 3, view = "Archaea & Bacteria", nfeatures = 8)
+plot_top_weights(mofa, factor = 3, view = "Ciliates", nfeatures = 8)
+plot_top_weights(mofa, factor = 3, view = "Fungi", nfeatures = 8)
+plot_top_weights(mofa, factor = 3, view = "Host (Digesta Fluid)", nfeatures = 8)
+plot_top_weights(mofa, factor = 3, view = "Host (Liver)", nfeatures = 8)
+plot_top_weights(mofa, factor = 3, view = "Host (Digesta Wall)", nfeatures = 8)
+```
+
+```{r, fig.width=10, fig.height=8, out.width="90%"}
+# Plot feature values
+treatment.colors <- c("control" = "olivedrab3", "treatment" = "salmon1")
+breed.colors <- c("Aberdeen Angus X" = "turquoise1", "Luing" = "orchid1")
+
+# Heatmap Archaea and Bacteria, no denoising:
+plot_data_heatmap(
+  mofa, 
+  factor = 3, 
+  view = "Archaea & Bacteria", 
+  features = 20,
+  denoise = FALSE,
+  cluster_rows = TRUE, cluster_cols = FALSE,
+  show_colnames = FALSE, show_rownames = TRUE,
+  annotation_samples = c("Treatment", "Breed"),
+  annotation_colors = list(
+    "Treatment" = treatment.colors, 
+    "Breed" = breed.colors),
+  annotation_legend = TRUE,
+  scale = "row"
+)
+
+# Heatmap after denoising:
+plot_data_heatmap(
+  mofa, 
+  factor = 3, 
+  view = "Archaea & Bacteria", 
+  features = 20,
+  denoise = TRUE,
+  cluster_rows = TRUE, cluster_cols = FALSE,
+  show_colnames = FALSE, show_rownames = TRUE,
+  annotation_samples = c("Treatment", "Breed"),
+  annotation_colors = list(
+    "Treatment" = treatment.colors, 
+    "Breed" = breed.colors),
+  annotation_legend = TRUE,
+  scale = "row"
+)
+
+# Heatmap Ciliates, no denoising:
+plot_data_heatmap(
+  mofa, 
+  factor = 3, 
+  view = "Ciliates", 
+  features = 20,
+  denoise = FALSE,
+  cluster_rows = TRUE, cluster_cols = FALSE,
+  show_colnames = FALSE, show_rownames = TRUE,
+  annotation_samples = c("Treatment", "Breed"),
+  annotation_colors = list(
+    "Treatment" = treatment.colors, 
+    "Breed" = breed.colors),
+  annotation_legend = TRUE,
+  scale = "row"
+)
+
+# Heatmap after denoising:
+plot_data_heatmap(
+  mofa, 
+  factor = 3, 
+  view = "Ciliates", 
+  features = 20,
+  denoise = TRUE,
+  cluster_rows = TRUE, cluster_cols = FALSE,
+  show_colnames = FALSE, show_rownames = TRUE,
+  annotation_samples = c("Treatment", "Breed"),
+  annotation_colors = list(
+    "Treatment" = treatment.colors, 
+    "Breed" = breed.colors),
+  annotation_legend = TRUE,
+  scale = "row"
+)
+
+# Heatmap Fungi, no denoising:
+plot_data_heatmap(
+  mofa, 
+  factor = 3, 
+  view = "Fungi", 
+  features = 20,
+  denoise = FALSE,
+  cluster_rows = TRUE, cluster_cols = FALSE,
+  show_colnames = FALSE, show_rownames = TRUE,
+  annotation_samples = c("Treatment", "Breed"),
+  annotation_colors = list(
+    "Treatment" = treatment.colors, 
+    "Breed" = breed.colors),
+  annotation_legend = TRUE,
+  scale = "row"
+)
+
+# Heatmap after denoising:
+plot_data_heatmap(
+  mofa, 
+  factor = 3, 
+  view = "Fungi", 
+  features = 20,
+  denoise = TRUE,
+  cluster_rows = TRUE, cluster_cols = FALSE,
+  show_colnames = FALSE, show_rownames = TRUE,
+  annotation_samples = c("Treatment", "Breed"),
+  annotation_colors = list(
+    "Treatment" = treatment.colors, 
+    "Breed" = breed.colors),
+  annotation_legend = TRUE,
+  scale = "row"
+)
+
+# Heatmap Metazoa (Digesta), no denoising:
+plot_data_heatmap(
+  mofa, 
+  factor = 3, 
+  view = "Host (Digesta Fluid)", 
+  features = 20,
+  denoise = FALSE,
+  cluster_rows = TRUE, cluster_cols = FALSE,
+  show_colnames = FALSE, show_rownames = TRUE,
+  annotation_samples = c("Treatment", "Breed"),
+  annotation_colors = list(
+    "Treatment" = treatment.colors, 
+    "Breed" = breed.colors),
+  annotation_legend = TRUE,
+  scale = "row"
+)
+
+# Heatmap after denoising:
+plot_data_heatmap(
+  mofa, 
+  factor = 3, 
+  view = "Host (Digesta Fluid)", 
+  features = 20,
+  denoise = TRUE,
+  cluster_rows = TRUE, cluster_cols = FALSE,
+  show_colnames = FALSE, show_rownames = TRUE,
+  annotation_samples = c("Treatment", "Breed"),
+  annotation_colors = list(
+    "Treatment" = treatment.colors, 
+    "Breed" = breed.colors),
+  annotation_legend = TRUE,
+  scale = "row"
+)
+
+# Heatmap Metazoa (Liver), no denoising:
+plot_data_heatmap(
+  mofa, 
+  factor = 3, 
+  view = "Host (Liver)", 
+  features = 20,
+  denoise = FALSE,
+  cluster_rows = TRUE, cluster_cols = FALSE,
+  show_colnames = FALSE, show_rownames = TRUE,
+  annotation_samples = c("Treatment", "Breed"),
+  annotation_colors = list(
+    "Treatment" = treatment.colors, 
+    "Breed" = breed.colors),
+  annotation_legend = TRUE,
+  scale = "row"
+)
+
+# Heatmap after denoising:
+plot_data_heatmap(
+  mofa, 
+  factor = 3, 
+  view = "Host (Liver)", 
+  features = 20,
+  denoise = TRUE,
+  cluster_rows = TRUE, cluster_cols = FALSE,
+  show_colnames = FALSE, show_rownames = TRUE,
+  annotation_samples = c("Treatment", "Breed"),
+  annotation_colors = list(
+    "Treatment" = treatment.colors, 
+    "Breed" = breed.colors),
+  annotation_legend = TRUE,
+  scale = "row"
+)
+
+# Heatmap Metazoa (Wall), no denoising:
+plot_data_heatmap(
+  mofa, 
+  factor = 3, 
+  view = "Host (Digesta Wall)", 
+  features = 20,
+  denoise = FALSE,
+  cluster_rows = TRUE, cluster_cols = FALSE,
+  show_colnames = FALSE, show_rownames = TRUE,
+  annotation_samples = c("Treatment", "Breed"),
+  annotation_colors = list(
+    "Treatment" = treatment.colors, 
+    "Breed" = breed.colors),
+  annotation_legend = TRUE,
+  scale = "row"
+)
+
+# Heatmap after denoising:
+plot_data_heatmap(
+  mofa, 
+  factor = 3, 
+  view = "Host (Digesta Wall)", 
+  features = 20,
+  denoise = TRUE,
+  cluster_rows = TRUE, cluster_cols = FALSE,
+  show_colnames = FALSE, show_rownames = TRUE,
+  annotation_samples = c("Treatment", "Breed"),
+  annotation_colors = list(
+    "Treatment" = treatment.colors, 
+    "Breed" = breed.colors),
+  annotation_legend = TRUE,
+  scale = "row"
+)
+```
+
+```{r, fig.width=10, fig.height=8, out.width="90%"}
+# Scatter plots
+plot_data_scatter(mofa, 
+                  factor = 3, 
+                  view = "Archaea & Bacteria", 
+                  features = 4, # only the top 4 features with the largest weights for that factor are plotted
+                  dot_size = 3,
+                  color_by = "Treatment",
+                  legend = F
+)
+
+plot_data_scatter(mofa, 
+                  factor = 3, 
+                  view = "Ciliates", 
+                  features = 4,
+                  dot_size = 3,
+                  color_by = "Treatment",
+                  legend = F
+)
+
+plot_data_scatter(mofa, 
+                  factor = 3, 
+                  view = "Fungi", 
+                  features = 4,
+                  dot_size = 3,
+                  color_by = "Treatment",
+                  legend = F
+)
+
+plot_data_scatter(mofa, 
+                  factor = 3, 
+                  view = "Host (Digesta Fluid)", 
+                  features = 4,
+                  dot_size = 3,
+                  color_by = "Treatment",
+                  legend = F
+)
+
+plot_data_scatter(mofa, 
+                  factor = 3, 
+                  view = "Host (Liver)", 
+                  features = 4,
+                  dot_size = 3,
+                  color_by = "Treatment",
+                  legend = F
+)
+
+plot_data_scatter(mofa, 
+                  factor = 3, 
+                  view = "Host (Digesta Wall)", 
+                  features = 4,
+                  dot_size = 3,
+                  color_by = "Treatment",
+                  legend = F
+)
+```
+
+## Association with clinical covariates
+
+```{r, fig.width=10, fig.height=8, out.width="90%"}
+# ch4_g_kg_dmi = methane emission intensity trait, expressed as grams of CH₄ emitted per kg of dry matter intake
+covariates <- samples_metadata(mofa) %>%
+  as.data.frame()
+
+# keep only the covariate
+covariates <- covariates[, "ch4_g_kg_dmi", drop = FALSE]
+
+# ensure numeric
+covariates$ch4_g_kg_dmi <- as.numeric(covariates$ch4_g_kg_dmi)
+
+summary(covariates$ch4_g_kg_dmi)
+
+# run correlation -> show Pearson correlations between each latent Factor (rows) and the sample metadata covariates (columns)
+correlate_factors_with_covariates(
+  mofa,
+  covariates = covariates,
+  plot = "r",
+  na.label = " " # mofa object has one group only, so there’s no per-group correlation to display
+)
+```
+
+- Blue circles = positive correlation
+- Red circles = negative correlation
+- Circle size = correlation strength
+- Color intensity = magnitude of correlation
+
+### Plot factor values colored by metabolite levels
+```{r, fig.width=10, fig.height=8, out.width="90%"}
+plot_factors(mofa, 
+             factors = c(1,3), 
+             color_by = "ch4_g_kg_dmi", 
+             shape_by = "Breed", 
+             dot_size = 3.5
+) + scale_fill_gradient(low = "white", high = "#BF3EFF")
+```
+
+## Test Pearson correlation
+### MOFA Factors vs ch4_g_kg_dmi
+
+```{r, fig.width=10, fig.height=8, out.width="90%"}
+# Extract covariate (numeric variable)
+covariates <- samples_metadata(mofa) %>%
+  as.data.frame() %>%
+  dplyr::select(ch4_g_kg_dmi)
+
+# Extract factors
+factors_list <- get_factors(mofa, factors = "all")
+factors <- as.data.frame(factors_list[[1]])
+factors <- as.data.frame(lapply(factors, as.numeric))
+
+# Combine both into one dataframe
+df <- cbind(factors, ch4_g_kg_dmi = covariates$ch4_g_kg_dmi)
+
+# Example: test correlation between Factor1 and ch4_g_kg_dmi
+cor.test(formula = ~ Factor1 + ch4_g_kg_dmi, data = df)
+
+# Example: test correlation between Factor3 and ch4_g_kg_dmi
+cor.test(formula = ~ Factor3 + ch4_g_kg_dmi, data = df)
+
+# Test for all factors
+for (f in colnames(factors)) {
+  test <- cor.test(formula = as.formula(paste("~", f, "+ ch4_g_kg_dmi")), data = df)
+  cat(f, ": r =", round(test$estimate, 3),
+      ", p =", signif(test$p.value, 3), "\n")
+}
+```
+
+None of the factors have a statistically significant correlation with ch4_g_kg_dmi (all p > 0.05).
+
+## Check if the 30 proteins from OmniCorr darkgreen module are present in the input data in MOFA 
+
+```{r}
+# Import module darkgreen
+proteins_darkgreen <- read.csv("Darkgreenmodule_allprotein_info.csv", header = TRUE)
+
+colnames(proteins_darkgreen)
+darkgreen_proteins <- unique(proteins_darkgreen$protein)
+
+check_presence <- function(df, df_name) {
+  shared <- intersect(darkgreen_proteins, rownames(df))
+  cat(df_name, ": ", length(shared), "proteins found\n")
+  return(shared)
+}
+
+shared_ciliates <- check_presence(ciliates_df, "Ciliates")
+shared_fungi <- check_presence(fungi_df, "Fungi")
+shared_archbac <- check_presence(archbac_df, "Archaea/Bacteria")
+shared_metazoa <- check_presence(metazoa_df, "Metazoa")
+shared_metL <- check_presence(metL_df, "MetL")
+shared_metW <- check_presence(metW_df, "MetW")
+```
+
+All proteins in the darkgreen module are present in Archaea & Bacteria.
+
+## Indirect approach
+### Check whether 30 proteins from 22 samples (from MEdarkgreen module in OmniCorr) have high weights in any of the MOFA factors
+
+This approach extracts feature names indirectly from the MOFA factor weight matrices, showing whether any darkgreen proteins contribute to factor loadings in this view.
+```{r}
+darkgreen_proteins <- unique(proteins_darkgreen$protein)
+
+# Clean prefix (dbA|, dbB| etc.)
+darkgreen_proteins_clean <- gsub(".*\\|", "", darkgreen_proteins)
+darkgreen_proteins_clean <- trimws(darkgreen_proteins_clean)
+
+# Extract weights/loadings from all MOFA views
+loadings_list <- get_weights(mofa, views = "all", factors = "all", as.data.frame = FALSE)
+
+# Combine all views into a single matrix
+combined_loadings <- do.call(rbind, lapply(names(loadings_list), function(view) {
+  mat <- loadings_list[[view]]
+  rownames(mat) <- paste(view, rownames(mat), sep = "::")
+  mat
+}))
+
+# Clean rownames: remove view prefix, dbA|/dbB| prefixes, and view suffix
+rownames(combined_loadings) <- sub(".*::", "", rownames(combined_loadings))        # remove view prefix
+rownames(combined_loadings) <- gsub(".*\\|", "", rownames(combined_loadings))     # remove dbA|/dbB|
+for (view in names(loadings_list)) {
+  pattern <- paste0("_", gsub("([\\W])", "\\\\\\1", view), "$")  # remove view suffix
+  rownames(combined_loadings) <- sub(pattern, "", rownames(combined_loadings))
+}
+rownames(combined_loadings) <- trimws(rownames(combined_loadings))
+
+# Identify darkgreen proteins in all views
+views <- names(loadings_list)
+overlap_results <- list()
+
+for (v in views) {
+  # Extract weights for all factors in this view
+  view_weights <- loadings_list[[v]]
+  
+  # Clean MOFA rownames: remove dbA| prefixes and view suffixes
+  rownames_clean <- rownames(view_weights)
+  rownames_clean <- gsub(".*\\|", "", rownames_clean)
+  rownames_clean <- gsub(paste0("_", gsub(" ", "", v), ".*"), "", rownames_clean)
+  rownames_clean <- trimws(rownames_clean)
+  
+  # Identify darkgreen proteins present in this view
+  present_proteins <- intersect(darkgreen_proteins_clean, rownames_clean)
+  
+  if (length(present_proteins) > 0) {
+    weights_sub <- view_weights[rownames_clean %in% present_proteins, , drop = FALSE]
+    
+    tidy_df <- as.data.frame(weights_sub) %>%
+      rownames_to_column("protein_raw") %>%
+      mutate(protein = gsub(".*\\|", "", protein_raw)) %>%
+      pivot_longer(
+        cols = starts_with("Factor"),
+        names_to = "Factor",
+        values_to = "Weight"
+      ) %>%
+      mutate(
+        abs_weight = abs(Weight),
+        View = v
+      )
+    
+    overlap_results[[v]] <- tidy_df
+  }
+}
+
+darkgreen_overlap <- bind_rows(overlap_results)
+
+# Top 20 darkgreen proteins by absolute weight across all views
+darkgreen_overlap %>%
+  arrange(desc(abs_weight)) %>%
+  head(20)
+```
+
+## Fisher's exact test 
+### To determine whether our 30 proteins are enriched among the top 20% of all proteins
+
+```{r}
+# Use darkgreen_proteins_clean
+all_features <- rownames(combined_loadings)
+n_total <- length(all_features)
+n_total
+```
+
+24487 is the total number of proteins across all views.
+
+```{r, fig.width=10, fig.height=8, out.width="90%"}
+fisher_results <- data.frame(
+  Factor = colnames(combined_loadings),
+  Overlap = NA,
+  Pvalue = NA,
+  stringsAsFactors = FALSE
+)
+
+# Loop over all factors
+for (f in colnames(combined_loadings)) {
+  # Absolute loadings for factor f
+  abs_load <- abs(combined_loadings[, f])
+  
+  # Select the top 20% most strongly associated proteins with that factor
+  cutoff <- quantile(abs_load, 0.80)
+  top_features <- names(abs_load[abs_load >= cutoff])
+  
+  # Calculate overlap with darkgreen proteins
+  overlap <- length(intersect(top_features, darkgreen_proteins_clean))
+  a <- overlap
+  b <- length(top_features) - a
+  c <- length(darkgreen_proteins_clean) - a
+  d <- n_total - a - b - c
+  
+  # Contingency table
+  contingency <- matrix(c(a, b, c, d), nrow = 2)
+  
+  # Fisher's exact test
+  fisher_p <- fisher.test(contingency, alternative = "greater")$p.value
+  
+  fisher_results[fisher_results$Factor == f, "Overlap"] <- a
+  fisher_results[fisher_results$Factor == f, "Pvalue"] <- fisher_p
+}
+
+# Adjust p-values for multiple testing
+fisher_results$FDR <- p.adjust(fisher_results$Pvalue, method = "BH")
+print(fisher_results)
+
+# Horizontal bar plot
+# Make Factor a factor so it keeps the same order
+fisher_results$Factor <- factor(fisher_results$Factor, levels = fisher_results$Factor)
+
+ggplot(fisher_results, aes(x = -log10(Pvalue), y = Factor)) +
+  geom_bar(stat = "identity", fill = "darkgreen") +
+  geom_vline(xintercept = -log10(0.05), color = "red", linetype = "dashed") +
+  theme_bw() +
+  labs(
+    title = "Enrichment of dark green module proteins across MOFA factors",
+    x = "-log10(P-value)",
+    y = "MOFA Factor"
+  )
+```
+
+### Check how many proteins overlap with Factor 6
+```{r}
+fisher_results[fisher_results$Factor == "Factor6", "Overlap"]
+```
+
+### Check how many proteins overlap with Factor 8
+```{r}
+fisher_results[fisher_results$Factor == "Factor8", "Overlap"]
+```
+
+```{r}
+sessionInfo()
+```
