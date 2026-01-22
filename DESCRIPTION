@@ -1,6 +1,6 @@
 Package: OmniCorr
 Title: Multi-omics integration framework
-Version: 0.1.0
+Version: 0.1.1
 Authors@R: 
     person("Shashank", "Gupta", , "bioinformaticssrm2011@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-8839-7003"))
