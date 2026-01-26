@@ -286,3 +286,4 @@ plot_omnicorr_circos(
   fdr_cutoff = 0.0001
 )
 ```
+<img width="1003" height="796" alt="circos_plot" src="https://github.com/user-attachments/assets/e6cbf722-f7a7-4428-b61b-fa0deb03436b" />
