@@ -73,8 +73,11 @@ plot_omnicorr_circos <- function(
   safe_cor_test <- function(x, y, method) {
     ok <- stats::complete.cases(x, y)
     if (sum(ok) < 3) return(NA_real_)
-    stats::cor.test(x[ok], y[ok], method = method)$p.value
+    suppressWarnings(
+      stats::cor.test(x[ok], y[ok], method = method)$p.value
+    )
   }
+  
   
   ## ===========================
   ## Compute omics–omics edges
