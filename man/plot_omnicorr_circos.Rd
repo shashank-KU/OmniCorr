@@ -14,47 +14,23 @@ plot_omnicorr_circos(
 )
 }
 \arguments{
-\item{omics_list}{A named list of data frames or matrices, where each element
-represents one omics layer. Rows must correspond to samples and columns to
-features. All omics layers must share identical sample order.}
+\item{omics_list}{Named list of omics matrices (rows = samples, cols = features).}
 
-\item{metadata}{(optional) A data frame or matrix of numeric sample-level
-metadata (rows = samples, columns = variables).}
+\item{metadata}{Optional numeric sample-level metadata.}
 
-\item{method}{Correlation method. Default is \code{"spearman"}.}
+\item{method}{Correlation method ("spearman", "pearson", "kendall").}
 
-\item{fdr_cutoff}{Adjusted p-value threshold for retaining correlations.
-Default is \code{0.05}.}
+\item{fdr_cutoff}{Adjusted p-value cutoff.}
 
-\item{max_abs_cor}{Maximum absolute correlation value used for color scaling.
-Default is \code{0.5}.}
+\item{max_abs_cor}{Maximum absolute correlation used for color scaling.}
 
-\item{min_degree}{Minimum number of significant connections required for
-omics features to be displayed. Metadata variables are always retained.}
+\item{min_degree}{Minimum number of edges required for omics features.}
 }
 \value{
-Invisibly returns a data frame of retained edges used in the Circos plot.
+Invisibly returns a data frame of retained edges.
 }
 \description{
 Generates an optional Circos (chord) diagram to visualize statistically
-significant correlations between multiple omics layers (e.g. transcriptomics,
-metagenomics, metatranscriptomics) and optional numeric sample metadata.
-
-This function is intended as a downstream visualization utility and is not
-part of the core OmniCorr correlation or clustering pipeline.
-}
-\examples{
-\dontrun{
-omics <- list(
-  Transcriptomics = Transcriptomics,
-  Metagenomics = Metagenomics,
-  Metatranscriptomics = Metatranscriptomics
-)
-
-plot_omnicorr_circos(
-  omics_list = omics,
-  metadata = metadata
-)
-}
-
+significant correlations between multiple omics layers and optional
+numeric sample metadata.
 }

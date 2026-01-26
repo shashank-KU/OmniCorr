@@ -2,52 +2,17 @@
 #'
 #' @description
 #' Generates an optional Circos (chord) diagram to visualize statistically
-#' significant correlations between multiple omics layers (e.g. transcriptomics,
-#' metagenomics, metatranscriptomics) and optional numeric sample metadata.
+#' significant correlations between multiple omics layers and optional
+#' numeric sample metadata.
 #'
-#' This function is intended as a downstream visualization utility and is not
-#' part of the core OmniCorr correlation or clustering pipeline.
+#' @param omics_list Named list of omics matrices (rows = samples, cols = features).
+#' @param metadata Optional numeric sample-level metadata.
+#' @param method Correlation method ("spearman", "pearson", "kendall").
+#' @param fdr_cutoff Adjusted p-value cutoff.
+#' @param max_abs_cor Maximum absolute correlation used for color scaling.
+#' @param min_degree Minimum number of edges required for omics features.
 #'
-#' @param omics_list A named list of data frames or matrices, where each element
-#'   represents one omics layer. Rows must correspond to samples and columns to
-#'   features. All omics layers must share identical sample order.
-#'
-#' @param metadata (optional) A data frame or matrix of numeric sample-level
-#'   metadata (rows = samples, columns = variables).
-#'
-#' @param method Correlation method. Default is \code{"spearman"}.
-#'
-#' @param fdr_cutoff Adjusted p-value threshold for retaining correlations.
-#'   Default is \code{0.05}.
-#'
-#' @param max_abs_cor Maximum absolute correlation value used for color scaling.
-#'   Default is \code{0.5}.
-#'
-#' @param min_degree Minimum number of significant connections required for
-#'   omics features to be displayed. Metadata variables are always retained.
-#'
-#' @return Invisibly returns a data frame of retained edges used in the Circos plot.
-#'
-#' @examples
-#' \dontrun{
-#' omics <- list(
-#'   Transcriptomics = Transcriptomics,
-#'   Metagenomics = Metagenomics,
-#'   Metatranscriptomics = Metatranscriptomics
-#' )
-#'
-#' plot_omnicorr_circos(
-#'   omics_list = omics,
-#'   metadata = metadata
-#' )
-#' }
-#'
-#' @importFrom stats cor cor.test p.adjust complete.cases
-#' @importFrom dplyr %>% mutate filter select count bind_rows rowwise ungroup pull
-#' @importFrom tidyr pivot_longer
-#' @importFrom circlize circos.clear circos.par circos.initialize circos.track chordDiagram colorRamp2 mm_y CELL_META
-#' @importFrom ComplexHeatmap Legend packLegend draw
-#' @importFrom grid unit gpar
+#' @return Invisibly returns a data frame of retained edges.
 #'
 #' @export
 plot_omnicorr_circos <- function(
@@ -62,6 +27,41 @@ plot_omnicorr_circos <- function(
   stopifnot(is.list(omics_list), length(omics_list) >= 2)
   
   ## ===========================
+  ## Sample consistency checks
+  ## ===========================
+  if (any(vapply(omics_list, function(x) is.null(rownames(x)), logical(1)))) {
+    stop("All omics matrices must have sample IDs as rownames.")
+  }
+  
+  n_samples <- vapply(omics_list, nrow, integer(1))
+  if (length(unique(n_samples)) != 1) {
+    stop("All omics matrices must have the same number of samples.")
+  }
+  
+  ref_samples <- rownames(omics_list[[1]])
+  for (nm in names(omics_list)) {
+    if (!identical(rownames(omics_list[[nm]]), ref_samples)) {
+      stop(
+        sprintf(
+          "Sample mismatch detected in omics layer '%s'.\nUse CheckSampleOrder() before calling plot_omnicorr_circos().",
+          nm
+        )
+      )
+    }
+  }
+  
+  if (!is.null(metadata)) {
+    if (is.null(rownames(metadata))) {
+      stop("Metadata must have sample IDs as rownames.")
+    }
+    if (!identical(rownames(metadata), ref_samples)) {
+      stop(
+        "Sample mismatch between metadata and omics data.\nUse CheckSampleOrder() before calling plot_omnicorr_circos()."
+      )
+    }
+  }
+  
+  ## ===========================
   ## Safe correlation helpers
   ## ===========================
   safe_cor <- function(x, y, method) {
@@ -73,14 +73,11 @@ plot_omnicorr_circos <- function(
   safe_cor_test <- function(x, y, method) {
     ok <- stats::complete.cases(x, y)
     if (sum(ok) < 3) return(NA_real_)
-    suppressWarnings(
-      stats::cor.test(x[ok], y[ok], method = method)$p.value
-    )
+    suppressWarnings(stats::cor.test(x[ok], y[ok], method = method)$p.value)
   }
   
-  
   ## ===========================
-  ## Compute omics–omics edges
+  ## Helper: compute edges
   ## ===========================
   compute_edges <- function(df1, df2, name1, name2) {
     
@@ -105,7 +102,7 @@ plot_omnicorr_circos <- function(
   }
   
   ## ===========================
-  ## Pairwise omics correlations
+  ## Omics–omics correlations
   ## ===========================
   edges <- list()
   omic_names <- names(omics_list)
@@ -129,7 +126,6 @@ plot_omnicorr_circos <- function(
   ## ===========================
   if (!is.null(metadata)) {
     
-    metadata <- as.data.frame(metadata)
     metadata <- metadata[, vapply(metadata, is.numeric, logical(1)), drop = FALSE]
     
     edges_meta <- lapply(names(omics_list), function(nm) {
@@ -184,7 +180,7 @@ plot_omnicorr_circos <- function(
     dplyr::filter(from %in% keep_nodes & to %in% keep_nodes)
   
   ## ===========================
-  ## Circos setup
+  ## Circos plot
   ## ===========================
   circlize::circos.clear()
   circlize::circos.par(
@@ -203,22 +199,11 @@ plot_omnicorr_circos <- function(
     xlim = cbind(rep(0, length(sectors)), rep(1, length(sectors)))
   )
   
-  ## ===========================
-  ## Groups & colors
-  ## ===========================
-  group <- ifelse(
-    grepl("^Metadata::", sectors),
-    "Metadata",
-    sub("::.*", "", sectors)
-  )
-  
-  group_levels <- unique(group)
-  
+  group <- ifelse(grepl("^Metadata::", sectors), "Metadata", sub("::.*", "", sectors))
   group_cols <- stats::setNames(
-    RColorBrewer::brewer.pal(max(3, length(group_levels)), "Set2")[seq_along(group_levels)],
-    group_levels
+    RColorBrewer::brewer.pal(max(3, length(unique(group))), "Set2")[seq_along(unique(group))],
+    unique(group)
   )
-  
   sector_cols <- stats::setNames(group_cols[group], sectors)
   
   col_fun <- circlize::colorRamp2(
@@ -226,9 +211,6 @@ plot_omnicorr_circos <- function(
     c("#4575B4", "#F7F7F7", "#D73027")
   )
   
-  ## ===========================
-  ## Draw Circos
-  ## ===========================
   circlize::chordDiagram(
     edges[, c("from", "to")],
     grid.col = sector_cols,
@@ -240,17 +222,14 @@ plot_omnicorr_circos <- function(
     directional = 0
   )
   
-  ## ===========================
-  ## Feature labels
-  ## ===========================
   circlize::circos.track(
     track.index = 1,
     panel.fun = function(x, y) {
       label <- sub("^.*::", "", circlize::CELL_META$sector.index)
       circlize::circos.text(
-        x = mean(circlize::CELL_META$xlim),
-        y = circlize::CELL_META$ylim[1] + circlize::mm_y(2),
-        labels = label,
+        mean(circlize::CELL_META$xlim),
+        circlize::CELL_META$ylim[1] + circlize::mm_y(2),
+        label,
         facing = "clockwise",
         niceFacing = TRUE,
         cex = 0.6
@@ -259,9 +238,6 @@ plot_omnicorr_circos <- function(
     bg.border = NA
   )
   
-  ## ===========================
-  ## Legends (right side)
-  ## ===========================
   lgd_group <- ComplexHeatmap::Legend(
     labels = names(group_cols),
     legend_gp = grid::gpar(fill = group_cols),
@@ -270,8 +246,7 @@ plot_omnicorr_circos <- function(
   
   lgd_cor <- ComplexHeatmap::Legend(
     col_fun = col_fun,
-    title = paste(method, "correlation"),
-    direction = "vertical"
+    title = paste(method, "correlation")
   )
   
   ComplexHeatmap::draw(
