@@ -3,7 +3,6 @@
 export(CheckSampleOrder)
 export(calculate_correlations)
 export(metadata)
-export(plot_omnicorr_circos)
 importFrom(stats,complete.cases)
 importFrom(stats,cor)
 importFrom(stats,cor.test)
