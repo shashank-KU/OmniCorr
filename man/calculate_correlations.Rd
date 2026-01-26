@@ -14,45 +14,48 @@ calculate_correlations(
 )
 }
 \arguments{
-\item{df1}{A data frame containing the first set of variables to be correlated. The samples should be in the rows and the Genes/Proteins/Metabolites/ASVs in the columns.}
+\item{df1}{A data frame or matrix containing the first set of variables to be correlated.
+Rows are samples, columns are variables (e.g., genes, proteins, metabolites).}
 
-\item{df2}{A data frame containing the second set of variables to be correlated. The samples should be in the rows and the Genes/Proteins/Metabolites/ASVs in the columns.}
+\item{df2}{A data frame or matrix containing the second set of variables to be correlated.
+Rows are samples, columns are variables.}
 
-\item{method}{(optional) The correlation method to be used. Default is "pearson". Other options include "spearman" and "kendall".}
+\item{method}{The correlation method to be used.
+Default is "pearson". Other options include "spearman" and "kendall".}
 
-\item{adjust_method}{(optional) The method for adjusting the p-values for multiple testing. Default is "fdr". If "none", no adjustment is applied, and raw p-values are returned.}
+\item{adjust_method}{Method for adjusting the p-values for multiple testing.
+Default is "fdr". If "none", no adjustment is applied.
+Supports all methods from \code{p.adjust.methods}.}
 
-\item{use}{(optional) A character string specifying the handling of missing data. Default is "all.obs".
-The fast calculations currently support "all.obs" and "pairwise.complete.obs";
-for other options, see R's standard correlation function cor. Abbreviations are allowed.}
+\item{use}{Handling of missing data.
+One of "all.obs" or "pairwise.complete.obs".}
 
-\item{show_significance}{(optional) A character string indicating whether to show significance levels as stars, p-values, or correlation values. Default is "stars".
-Possible values are "stars", "p_value" or "correlation".}
+\item{show_significance}{How to represent significance in the output.
+One of "stars", "p_value", or "correlation".}
 }
 \value{
-A list containing the correlation results
-
-\item{$correlation}{Matrix of correlation coefficients.}
-
-\item{$p_value}{Matrix of p-values for the correlation coefficients.}
-
-\item{$p_value_adj}{Matrix of adjusted p-values for the correlation coefficients, or the same as p-value if no adjustment is applied (when \code{adjust_method = "none"}).}
-
-\item{$signif_matrix}{Matrix indicating the significance level of the correlations.
-If \code{show_significance = "stars"}, the significance level is shown as stars;
-if \code{show_significance = "p_value"}, the significance level is shown as p-value;
-if \code{show_significance = "correlation"}, the significance level is shown as the correlation value.}
+A list containing:
+\item{correlation}{Matrix of correlation coefficients (rounded to 3 decimals).}
+\item{p_value}{Matrix of raw p-values.}
+\item{p_value_adj}{Matrix of adjusted p-values.}
+\item{signif_matrix}{Matrix of significance stars, p-values, or correlations.}
 }
 \description{
-This function calculates the correlation matrix between the columns of two data frames, along with p-values and optionally adjusted p-values for multiple testing. Significance levels can be displayed as stars, p-values, or correlation values based on the \code{show_significance} parameter.
+This function calculates the correlation matrix between the columns of two data frames.
+}
+\details{
+Pearson and Spearman correlations are computed using
+\code{WGCNA::corAndPvalue} for efficiency.
+Kendall correlation uses \code{cor.test} in a loop and may be slow for large datasets.
 }
 \examples{
-# Calculate correlation between two data frames using default parameters and show significance level as p-value
-result_list <- calculate_correlations(df1 = Transcriptomics, df2 = Metagenomics, show_significance = "p_value")
+data(Transcriptomics)
+data(Metagenomics)
 
-# Calculate correlation and show significance as stars with adjusted p-values using the BH method
-result_list <- calculate_correlations(df1 = Transcriptomics, df2 = Metagenomics, adjust_method = "BH", show_significance = "stars")
+result_list <- calculate_correlations(
+  df1 = Transcriptomics,
+  df2 = Metagenomics,
+  show_significance = "p_value"
+)
 
-# Calculate correlation without p-value adjustment
-result_list <- calculate_correlations(df1 = Transcriptomics, df2 = Metagenomics, adjust_method = "none", show_significance = "stars")
 }

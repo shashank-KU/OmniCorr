@@ -4,9 +4,9 @@
 \name{OmniCorr-package}
 \alias{OmniCorr}
 \alias{OmniCorr-package}
-\title{OmniCorr: Calculate correlation between two data frame}
+\title{OmniCorr: Multi-omics Integration and Visualization Framework}
 \description{
-This function takes in two data frames df1 and df2, and calculates the correlation matrix between the columns of both data frames. The user can specify the correlation method to be used by passing the method parameter. By default, the function uses Pearson correlation. The function calculates the p-values for the correlation tests and adjusts them for multiple testing using the specified adjustment method (default method is False Discovery Rate adjustment). The function returns a list of the correlation results including the correlation matrix, the p-value matrix, the adjusted p-value matrix, and the significance matrix indicating the significance level of the correlations.
+OmniCorr is an R package-style framework for correlation-based integration and visualization of multi-omics datasets, including transcriptomics, metatranscriptomics, metagenomics, metaproteomics, and associated sample metadata. The package computes pairwise correlations between independently processed omics layers and provides flexible tools for organizing and visualizing cross-omics associations using aligned heatmaps and optional network-style visualizations. OmniCorr is designed to complement existing preprocessing and network inference workflows rather than replace them.
 }
 \seealso{
 Useful links:

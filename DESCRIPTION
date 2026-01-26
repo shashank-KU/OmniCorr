@@ -20,7 +20,7 @@ Description: OmniCorr is an R package-style framework for correlation-based
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 Depends: 
     R (>= 3.6)
 Imports: 
