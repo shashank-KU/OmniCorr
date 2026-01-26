@@ -19,28 +19,21 @@ represents one omics layer. Rows must correspond to samples and columns to
 features. All omics layers must share identical sample order.}
 
 \item{metadata}{(optional) A data frame or matrix of numeric sample-level
-metadata (rows = samples, columns = variables). If provided, correlations
-between omics layers and metadata variables are included.}
+metadata (rows = samples, columns = variables).}
 
-\item{method}{Correlation method. Default is \code{"spearman"}.
-Supported options are \code{"pearson"}, \code{"spearman"}, and
-\code{"kendall"}.}
+\item{method}{Correlation method. Default is \code{"spearman"}.}
 
 \item{fdr_cutoff}{Adjusted p-value threshold for retaining correlations.
 Default is \code{0.05}.}
 
 \item{max_abs_cor}{Maximum absolute correlation value used for color scaling.
-Correlations are truncated to \code{[-max_abs_cor, max_abs_cor]}.
 Default is \code{0.5}.}
 
 \item{min_degree}{Minimum number of significant connections required for
-omics features to be displayed. Metadata variables are always retained.
-Default is \code{2}.}
+omics features to be displayed. Metadata variables are always retained.}
 }
 \value{
-Invisibly returns a data frame of retained edges used in the Circos plot,
-containing source node, target node, correlation coefficient, and truncated
-correlation used for visualization.
+Invisibly returns a data frame of retained edges used in the Circos plot.
 }
 \description{
 Generates an optional Circos (chord) diagram to visualize statistically
@@ -49,17 +42,6 @@ metagenomics, metatranscriptomics) and optional numeric sample metadata.
 
 This function is intended as a downstream visualization utility and is not
 part of the core OmniCorr correlation or clustering pipeline.
-}
-\details{
-Pairwise correlations are computed between all omics layers and, if provided,
-between each omics layer and metadata variables using \code{\link[stats]{cor}}
-and \code{\link[stats]{cor.test}} with pairwise complete observations.
-
-P-values are adjusted globally using the false discovery rate (FDR).
-Only significant correlations passing \code{fdr_cutoff} are visualized.
-
-Sector colors indicate omics layers and metadata, while link color and width
-encode correlation direction and magnitude.
 }
 \examples{
 \dontrun{
@@ -71,8 +53,7 @@ omics <- list(
 
 plot_omnicorr_circos(
   omics_list = omics,
-  metadata = metadata,
-  fdr_cutoff = 0.05
+  metadata = metadata
 )
 }
 

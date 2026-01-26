@@ -13,39 +13,20 @@
 #'   features. All omics layers must share identical sample order.
 #'
 #' @param metadata (optional) A data frame or matrix of numeric sample-level
-#'   metadata (rows = samples, columns = variables). If provided, correlations
-#'   between omics layers and metadata variables are included.
+#'   metadata (rows = samples, columns = variables).
 #'
 #' @param method Correlation method. Default is \code{"spearman"}.
-#'   Supported options are \code{"pearson"}, \code{"spearman"}, and
-#'   \code{"kendall"}.
 #'
 #' @param fdr_cutoff Adjusted p-value threshold for retaining correlations.
 #'   Default is \code{0.05}.
 #'
 #' @param max_abs_cor Maximum absolute correlation value used for color scaling.
-#'   Correlations are truncated to \code{[-max_abs_cor, max_abs_cor]}.
 #'   Default is \code{0.5}.
 #'
 #' @param min_degree Minimum number of significant connections required for
 #'   omics features to be displayed. Metadata variables are always retained.
-#'   Default is \code{2}.
 #'
-#' @return
-#' Invisibly returns a data frame of retained edges used in the Circos plot,
-#' containing source node, target node, correlation coefficient, and truncated
-#' correlation used for visualization.
-#'
-#' @details
-#' Pairwise correlations are computed between all omics layers and, if provided,
-#' between each omics layer and metadata variables using \code{\link[stats]{cor}}
-#' and \code{\link[stats]{cor.test}} with pairwise complete observations.
-#'
-#' P-values are adjusted globally using the false discovery rate (FDR).
-#' Only significant correlations passing \code{fdr_cutoff} are visualized.
-#'
-#' Sector colors indicate omics layers and metadata, while link color and width
-#' encode correlation direction and magnitude.
+#' @return Invisibly returns a data frame of retained edges used in the Circos plot.
 #'
 #' @examples
 #' \dontrun{
@@ -57,15 +38,14 @@
 #'
 #' plot_omnicorr_circos(
 #'   omics_list = omics,
-#'   metadata = metadata,
-#'   fdr_cutoff = 0.05
+#'   metadata = metadata
 #' )
 #' }
 #'
-#' @importFrom stats cor cor.test p.adjust
-#' @importFrom dplyr %>% mutate filter select count bind_rows
+#' @importFrom stats cor cor.test p.adjust complete.cases
+#' @importFrom dplyr %>% mutate filter select count bind_rows rowwise ungroup pull
 #' @importFrom tidyr pivot_longer
-#' @importFrom circlize circos.clear circos.par circos.initialize circos.track chordDiagram colorRamp2
+#' @importFrom circlize circos.clear circos.par circos.initialize circos.track chordDiagram colorRamp2 mm_y CELL_META
 #' @importFrom ComplexHeatmap Legend packLegend draw
 #' @importFrom grid unit gpar
 #'
@@ -82,7 +62,22 @@ plot_omnicorr_circos <- function(
   stopifnot(is.list(omics_list), length(omics_list) >= 2)
   
   ## ===========================
-  ## Helper: compute correlations
+  ## Safe correlation helpers
+  ## ===========================
+  safe_cor <- function(x, y, method) {
+    ok <- stats::complete.cases(x, y)
+    if (sum(ok) < 3) return(NA_real_)
+    stats::cor(x[ok], y[ok], method = method)
+  }
+  
+  safe_cor_test <- function(x, y, method) {
+    ok <- stats::complete.cases(x, y)
+    if (sum(ok) < 3) return(NA_real_)
+    stats::cor.test(x[ok], y[ok], method = method)$p.value
+  }
+  
+  ## ===========================
+  ## Compute omics–omics edges
   ## ===========================
   compute_edges <- function(df1, df2, name1, name2) {
     
@@ -93,20 +88,12 @@ plot_omnicorr_circos <- function(
     ) %>%
       dplyr::rowwise() %>%
       dplyr::mutate(
-        rho = suppressWarnings(
-          stats::cor(df1[[f1]], df2[[f2]],
-                     method = method,
-                     use = "pairwise.complete.obs")
-        ),
-        pval = suppressWarnings(
-          stats::cor.test(df1[[f1]], df2[[f2]],
-                          method = method,
-                          use = "pairwise.complete.obs")$p.value
-        )
+        rho  = safe_cor(df1[[f1]], df2[[f2]], method),
+        pval = safe_cor_test(df1[[f1]], df2[[f2]], method)
       ) %>%
       dplyr::ungroup() %>%
       dplyr::mutate(
-        fdr = stats::p.adjust(pval, method = "fdr"),
+        fdr  = stats::p.adjust(pval, method = "fdr"),
         from = paste(name1, f1, sep = "::"),
         to   = paste(name2, f2, sep = "::")
       ) %>%
@@ -140,7 +127,7 @@ plot_omnicorr_circos <- function(
   if (!is.null(metadata)) {
     
     metadata <- as.data.frame(metadata)
-    metadata <- metadata[, sapply(metadata, is.numeric), drop = FALSE]
+    metadata <- metadata[, vapply(metadata, is.numeric, logical(1)), drop = FALSE]
     
     edges_meta <- lapply(names(omics_list), function(nm) {
       
@@ -151,20 +138,12 @@ plot_omnicorr_circos <- function(
       ) %>%
         dplyr::rowwise() %>%
         dplyr::mutate(
-          rho = suppressWarnings(
-            stats::cor(omics_list[[nm]][[f1]], metadata[[f2]],
-                       method = method,
-                       use = "pairwise.complete.obs")
-          ),
-          pval = suppressWarnings(
-            stats::cor.test(omics_list[[nm]][[f1]], metadata[[f2]],
-                            method = method,
-                            use = "pairwise.complete.obs")$p.value
-          )
+          rho  = safe_cor(omics_list[[nm]][[f1]], metadata[[f2]], method),
+          pval = safe_cor_test(omics_list[[nm]][[f1]], metadata[[f2]], method)
         ) %>%
         dplyr::ungroup() %>%
         dplyr::mutate(
-          fdr = stats::p.adjust(pval, method = "fdr"),
+          fdr  = stats::p.adjust(pval, method = "fdr"),
           from = paste(nm, f1, sep = "::"),
           to   = paste("Metadata", f2, sep = "::")
         ) %>%
@@ -232,12 +211,12 @@ plot_omnicorr_circos <- function(
   
   group_levels <- unique(group)
   
-  group_cols <- setNames(
+  group_cols <- stats::setNames(
     RColorBrewer::brewer.pal(max(3, length(group_levels)), "Set2")[seq_along(group_levels)],
     group_levels
   )
   
-  sector_cols <- setNames(group_cols[group], sectors)
+  sector_cols <- stats::setNames(group_cols[group], sectors)
   
   col_fun <- circlize::colorRamp2(
     c(-max_abs_cor, 0, max_abs_cor),
