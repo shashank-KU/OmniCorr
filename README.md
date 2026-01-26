@@ -244,3 +244,45 @@ cowplot::plot_grid(
   rel_widths = c(1.5, 3.5, 1, 2))
 ```
 ![Rplot01](https://user-images.githubusercontent.com/30895959/223760509-8c3d8f8e-d232-4c0c-8832-9aa4c1ecf5d9.png)
+
+
+## Optional downstream visualization: Circos (chord) diagram
+
+In addition to aligned heatmaps, OmniCorr provides an optional Circos (chord) visualization to summarize statistically significant cross-omics associations in a compact network-style layout. This visualization is intended for exploratory interpretation and is not part of the core OmniCorr pipeline.
+
+The Circos plot displays:
+
+- Omics features (e.g. modules, hub genes, taxa) grouped by data type
+
+- Optional sample-level metadata variables
+
+- Significant cross-omics correlations passing a user-defined FDR threshold
+
+- Link color and width representing correlation direction and magnitude
+
+### Key characteristics
+
+- Supports any number of omics layers
+
+- Uses pairwise complete observations
+
+- Applies FDR correction across all tested associations
+
+- Retains metadata variables regardless of degree
+
+- Designed for summary visualization, not statistical inference
+
+### Example usage
+``` r
+omics <- list(
+  Transcriptomics     = Transcriptomics,
+  Metagenomics        = Metagenomics,
+  Metatranscriptomics = Metatranscriptomics
+)
+
+plot_omnicorr_circos(
+  omics_list = omics,
+  metadata   = metadata,
+  fdr_cutoff = 0.0001
+)
+```
