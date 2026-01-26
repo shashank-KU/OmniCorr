@@ -95,7 +95,7 @@ meanSdPlot(vsn_fit_W)
 ```
 
 ##### feel free to skip this chunk, for testing purpose only.
-```{r testing include=FALSE}
+```{r testing, include=FALSE}
 rawP_L <- rawP %>%
   filter(str_detect(source, "L")) %>% 
   select(protein, sample, intensity) 
@@ -686,13 +686,13 @@ plot(dendro.rows)
 
 ```{r}
 #meta$split <- as.factor(meta$split)
-meta <- meta %>%
-  rename(Treatment = treatment,
-         Breed     = breed) %>%
-  mutate(
-    Treatment = as.factor(Treatment),
-    Breed     = as.factor(Breed)
-  )
+#meta <- meta %>%
+#  rename(Treatment = treatment,
+#         Breed     = breed) %>%
+#  mutate(
+#    Treatment = as.factor(Treatment),
+#    Breed     = as.factor(Breed)
+#  )
 
 result2 <- pheatmap::pheatmap(t(Archbac_protmics)[,dendro.cols$order], 
                               cluster_rows = dendro.rows, 
@@ -1404,6 +1404,7 @@ ggsave(paste("all_proteomics_correlation_plots-", names(plot_list)[i],".pdf", se
 ```{r}
 save(meta, combined_MAG_genome, metadata, groups, file = "Omnicorr_cow_meta_traits.RData")
 ```
+
 
 
 
