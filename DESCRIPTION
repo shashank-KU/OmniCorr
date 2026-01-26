@@ -32,8 +32,6 @@ Imports:
     RColorBrewer,
     tibble,
     WGCNA,
-    circlize,
-    ComplexHeatmap,
     tidyr,
     grid
 Suggests: 
