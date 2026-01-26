@@ -287,3 +287,4 @@ plot_omnicorr_circos(
 )
 ```
 <img width="1003" height="796" alt="circos_plot" src="https://github.com/user-attachments/assets/e6cbf722-f7a7-4428-b61b-fa0deb03436b" />
+**Figure:** Circos (chord) diagram summarizing statistically significant cross-omics correlations (Spearman, FDR ≤ 1e−4). Sector colors indicate omics layers and metadata variables; link color and width represent correlation direction and magnitude.
