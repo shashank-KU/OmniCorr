@@ -1,25 +1,28 @@
 Package: OmniCorr
-Title: Multi-omics integration framework
-Version: 0.1.1
+Title: Multi-omics Integration and Visualization Framework
+Version: 0.1.2
 Authors@R: 
-    person("Shashank", "Gupta", , "bioinformaticssrm2011@gmail.com", role = c("aut", "cre"),
-           comment = c(ORCID = "0000-0001-8839-7003"))
+    person(
+        "Shashank", "Gupta",
+        email = "bioinformaticssrm2011@gmail.com",
+        role = c("aut", "cre"),
+        comment = c(ORCID = "0000-0001-8839-7003")
+    )
 Description: OmniCorr is an R package-style framework for correlation-based
     integration and visualization of multi-omics datasets, including
     transcriptomics, metatranscriptomics, metagenomics, metaproteomics,
     and associated sample metadata. The package computes pairwise correlations
     between independently processed omics layers and provides flexible tools
     for organizing and visualizing cross-omics associations using aligned
-    heatmaps. OmniCorr is designed to complement existing preprocessing and
-    network inference workflows rather than replace them.
+    heatmaps and optional network-style visualizations. OmniCorr is designed
+    to complement existing preprocessing and network inference workflows
+    rather than replace them.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
-Suggests: 
-    knitr,
-    rmarkdown,
-VignetteBuilder: knitr
+Depends: 
+    R (>= 3.6)
 Imports: 
     cowplot,
     dplyr,
@@ -28,9 +31,16 @@ Imports:
     pheatmap,
     RColorBrewer,
     tibble,
-    WGCNA
-Depends: 
-    R (>= 3.6)
-Config/testthat/edition: 3
+    WGCNA,
+    circlize,
+    ComplexHeatmap,
+    tidyr,
+    grid
+Suggests: 
+    knitr,
+    rmarkdown
+VignetteBuilder: 
+    knitr
 URL: https://github.com/shashank-KU/OmniCorr
 BugReports: https://github.com/shashank-KU/OmniCorr/issues
+Config/testthat/edition: 3
