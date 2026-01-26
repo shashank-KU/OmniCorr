@@ -248,7 +248,7 @@ cowplot::plot_grid(
 
 ## Optional downstream visualization: Circos (chord) diagram
 
-In addition to aligned heatmaps, OmniCorr provides an optional Circos (chord) visualization to summarize statistically significant cross-omics associations in a compact network-style layout. This visualization is intended for exploratory interpretation and is not part of the core OmniCorr pipeline.
+In addition to aligned heatmaps, OmniCorr provides an optional Circos (chord) visualization to summarize statistically significant cross-omics associations in a compact network-style layout.
 
 The Circos plot displays:
 
