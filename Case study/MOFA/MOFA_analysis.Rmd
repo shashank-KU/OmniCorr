@@ -32,22 +32,6 @@ library(readr)
 theme_set(theme_bw())
 ```
 
-## Load packages
-
-```{r}
-library(tidyverse)
-library(dplyr)
-library(data.table)
-library(purrr)
-library(ggplot2)
-library(ggpubr)
-library(MOFA2)
-library(basilisk)
-library(basilisk.utils)
-library(reticulate)
-library(readr)
-```
-
 ## Import data
 
 ```{r}
@@ -790,5 +774,5 @@ fisher_results[fisher_results$Factor == "Factor8", "Overlap"]
 ```
 
 ```{r}
-sessionInfo()
+sessioninfo::session_info()
 ```
