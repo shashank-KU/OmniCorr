@@ -52,12 +52,6 @@ library(stringr)
 library(RColorBrewer)
 ```
 
-
-```{r}
-dir.create("/Users/shashankgupta/Desktop/ImprovAFish/github/ImprovaFish/Transcriptomics/intermediate_files/Gut")
-setwd("/Users/shashankgupta/Desktop/ImprovAFish/github/ImprovaFish/Transcriptomics/intermediate_files/Gut")
-```
-
 Set seed as a precaution for reproducibility as some methods are non-deterministic.
 ```{r}
 set.seed(13118)
@@ -73,8 +67,20 @@ theme_set(theme_bw())
 
 ### Import data
 ```{r}
-host_gut_rawCounts_total1 <- read.table("/Users/shashankgupta/Desktop/ImprovAFish/host_data/host_gut_count.txt")
-sample_info <- read.csv("/Users/shashankgupta/Desktop/ImprovAFish/ImprovAFish/sample_info.csv", row.names = 1)
+
+# Path to the package raw-data
+transcriptomics_path <- system.file("raw-data/transcriptomics", package = "OmniCorr")
+
+# Load raw counts
+host_gut_rawCounts_total1 <- read.table(file.path(transcriptomics_path, "Transcriptomics_count.txt"), header = TRUE, row.names = 1)
+
+# Load sample metadata
+sample_info <- read.csv(file.path(transcriptomics_path, "sample_info.csv"), row.names = 1)
+
+# Load gene annotations
+annot_function <- read_tsv(file.path(transcriptomics_path, "Salmo_salar-GCA_905237065.2_gene_annotations.tsv"))
+
+# Assign to analysis objects
 omics_data_host <- host_gut_rawCounts_total1
 host_gut_mapping_file <- sample_info
 ```
@@ -136,7 +142,6 @@ design(dds) <- ~ group-1
 dds <- DESeq(dds, parallel = T)
 resultsNames(dds)
 
-annot_function <- read_tsv("/Users/shashankgupta/Desktop/ImprovAFish/Salmo_salar-GCA_905237065.2_gene_annotations.tsv")
 annot_function <- annot_function[, c("gene_id", "v2.gene_id.NCBI","v2.gene_name.ensembl", "v2.product")]
 ```
 
