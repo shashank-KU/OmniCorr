@@ -11,24 +11,6 @@ output:
       smooth_scroll: false
 ---
 
-
-```{r, include=FALSE}
-options(tinytex.verbose = TRUE)
-```
-
-```{r, include=FALSE}
-options(knitr.duplicate.label = 'allow')
-
-```
-
-```{r setup, include=FALSE} 
-knitr::opts_chunk$set(warning = FALSE, message = FALSE) 
-knitr::opts_knit$set(root.dir = '/Users/shashankgupta/Desktop/ImprovAFish/github/ImprovaFish/Transcriptomics/intermediate_files/Gut/')
-
-```
-
-
-
 ## Step 1. Transcriptomics
 ### Load packages
 ```{r}
