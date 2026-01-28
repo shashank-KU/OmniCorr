@@ -72,7 +72,7 @@ theme_set(theme_bw())
 transcriptomics_path <- system.file("raw-data/transcriptomics", package = "OmniCorr")
 
 # Load raw counts
-host_gut_rawCounts_total1 <- read.table(file.path(transcriptomics_path, "Transcriptomics_count.txt"), header = TRUE, row.names = 1)
+host_gut_rawCounts_total1 <- read.table(file.path(transcriptomics_path, "Transcriptomics_count.txt.gz"), header = TRUE, row.names = 1)
 
 # Load sample metadata
 sample_info <- read.csv(file.path(transcriptomics_path, "sample_info.csv"), row.names = 1)
