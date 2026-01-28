@@ -46,7 +46,6 @@ prefix <- "t"
 ### import data and intial preprocessing
 ```{r, warning=FALSE}
 #input raw metatranscriptomics data
-setwd("/Users/shashankgupta/Desktop/ImprovAFish/github/ImprovaFish/MetaTranscriptomics/")
 dds_metatranscriptomics <- readRDS(system.file("raw-data/metatranscriptomics/metatranscriptomics.rds", package = "OmniCorr"))
 dim(dds_metatranscriptomics)
 dds_metatranscriptomics <- dds[ , dds$TimePoint != "T0"]
