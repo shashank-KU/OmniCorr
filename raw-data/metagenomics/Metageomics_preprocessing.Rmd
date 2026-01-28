@@ -53,11 +53,12 @@ library("DT")
 
 ### Import data and clean the taxonomy
 ```{r }
-setwd("/Users/shashankgupta/Desktop/ImprovAFish/github/ImprovaFish/Metagenomics")
-raw <- import_biom("/Users/shashankgupta/Desktop/ImprovAFish/exported-feature-table/feature-table_taxonomy.biom")
-tree <- read_tree("/Users/shashankgupta/Desktop/ImprovAFish/exported-feature-table/tree.nwk")
-refseq <- Biostrings::readDNAStringSet("/Users/shashankgupta/Desktop/ImprovAFish/exported-feature-table/dna-sequences.fasta", use.names = TRUE)
-dat <- read.table("/Users/shashankgupta/Desktop/ImprovAFish/metadata.txt", header = TRUE,row.names = 1, sep = "\t")
+
+
+raw <- import_biom(system.file("raw-data/metagenomics/feature-table_taxonomy.biom", package = "OmniCorr"))
+tree <- read_tree(system.file("raw-data/metagenomics/tree.nwk", package = "OmniCorr"))
+refseq <- Biostrings::readDNAStringSet(system.file("raw-data/metagenomics/dna-sequences.fasta", package = "OmniCorr"))
+dat <- read.table(system.file("raw-data/metagenomics/metadata.txt", package = "OmniCorr"), header = TRUE, row.names = 1, sep = "\t")
 # Merge into one complete phyloseq object
 all <- merge_phyloseq(raw, sample_data(dat), tree, refseq)
 tax <- data.frame(tax_table(all), stringsAsFactors = FALSE)
@@ -170,28 +171,6 @@ estimate_rarified_richness <- function(psdata, measures, depth) {
 ```
 
 
-### Rarefaction plot
-```{r eecho=T, results='hide'}
-p <- ggrare(all.clean, step = 1000, 
-            color = "New_Diet", 
-            label = "sampleType", se = F,
-            parallel = TRUE,
-            plot = FALSE)
-cols  <- c(brewer.pal(8,"Set1"), brewer.pal(7,"Dark2"),brewer.pal(7,"Set2"),brewer.pal(12,"Set3"),brewer.pal(7,"Accent"),brewer.pal(12,"Paired"),"gray")
-
-p <- p + theme_bw() + 
-  scale_fill_manual(values =cols) +
-  scale_colour_manual( values = cols) +
-  facet_wrap(~New_Diet)
-
-```
-
-```{r}
-p
-
-```
-
-
 ### Alpha and Beta diversity
 ```{r, message=FALSE, warning=FALSE, fig.align='center', fig.width=14, fig.height=10}
 shannon.div <- estimate_richness(all.clean, measures = c("Shannon", "Simpson", "Observed","Chao1"))
@@ -266,7 +245,6 @@ PCoA_bray_plot<- plot_ordination(
 psdata <- subset_samples(all.noncontam, Sample_or_Control=="True_Sample")
 psdata <- prune_taxa(taxa_sums(psdata) > 0, psdata)
 psdata
-saveRDS(psdata, "/Users/shashankgupta/Desktop/ImprovAFish/github/ImprovaFish/Input/psdata.rds")
 ```
 
 ```{r echo=FALSE}
@@ -1226,7 +1204,6 @@ hubs <- chooseTopHubInEachModule(omics_data, modules.omics.Y$colors, power = st,
 
 stage2results_Y <- list(modules = modules.omics.Y, 
                         hubs = hubs)
-saveRDS(stage2results_Y, "/Users/shashankgupta/Desktop/ImprovAFish/github/ImprovaFish/OmicsIntegration/stage2results_Metagenomics.rds")
 ```
 
 Convert labels to colors for plotting and check how many ASVs are there in each modules
