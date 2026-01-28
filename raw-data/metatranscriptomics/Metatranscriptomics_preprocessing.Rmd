@@ -47,7 +47,7 @@ prefix <- "t"
 ```{r, warning=FALSE}
 #input raw metatranscriptomics data
 setwd("/Users/shashankgupta/Desktop/ImprovAFish/github/ImprovaFish/MetaTranscriptomics/")
-dds_metatranscriptomics <- readRDS("/Users/shashankgupta/Desktop/ImprovAFish/github/ImprovaFish/MetaTranscriptomics/dds_metatranscriptomics.rds")
+dds_metatranscriptomics <- readRDS(system.file("raw-data/metatranscriptomics/metatranscriptomics.rds", package = "OmniCorr"))
 dim(dds_metatranscriptomics)
 dds_metatranscriptomics <- dds[ , dds$TimePoint != "T0"]
 keep <- rowSums(counts(dds_metatranscriptomics) >=5) >= 5
@@ -65,12 +65,10 @@ sft <- pickSoftThreshold(metatranscriptomics,
                          verbose = 1, 
                          networkType = "signed",
                          corFn= "bicor")
-saveRDS(sft, "/Users/shashankgupta/Desktop/ImprovAFish/github/ImprovaFish/OmicsIntegration/sft.rds")
 ```
 
 
 ```{r, fig.align='center'}
-sft <- readRDS("/Users/shashankgupta/Desktop/ImprovAFish/github/ImprovaFish/OmicsIntegration/sft.rds")
 idx <- min(which((-sign(sft$fitIndices[,3])*sft$fitIndices[,2]) > 0.90))
 if(is.infinite(idx)){
   idx <- min(which((-sign(sft$fitIndices[,3])*sft$fitIndices[,2]) > 0.80))
@@ -155,17 +153,9 @@ modules.omics.MetaTrans <- blockwiseModules(metatranscriptomics,
 hubs <- chooseTopHubInEachModule(metatranscriptomics, modules.omics.MetaTrans$colors, power = st, omitColors = "0")
 stage2results_MetaTrans <- list(modules = modules.omics.MetaTrans, 
                         hubs = hubs)
-saveRDS(stage2results_MetaTrans, "/Users/shashankgupta/Desktop/ImprovAFish/github/ImprovaFish/OmicsIntegration/stage2results_MetaTranscriptomics.rds")
-saveRDS(modules.omics.MetaTrans, "/Users/shashankgupta/Desktop/ImprovAFish/github/ImprovaFish/OmicsIntegration/modules.omics.MetaTrans.rds")
 
 ```
 
-```{r}
-
-modules.omics.MetaTrans <- readRDS("/Users/shashankgupta/Desktop/ImprovAFish/github/ImprovaFish/OmicsIntegration/modules.omics.MetaTrans.rds")
-stage2results_MetaTrans <- readRDS("/Users/shashankgupta/Desktop/ImprovAFish/github/ImprovaFish/OmicsIntegration/stage2results_MetaTranscriptomics.rds")
-
-```
 
 Convert labels to colors for plotting
 ```{r}
