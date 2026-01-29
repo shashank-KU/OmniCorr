@@ -1,8 +1,0 @@
-ciliates - VSN-normalized ciliates proteomics matrix
-fungi - VSN-normalized fungi proteomics matrix
-archbac - VSN-normalized archaea/bacteria proteomics matrix
-metazoa - VSN-normalized host digesta proteomics matrix
-metL - VSN-normalized liver proteomics matrix
-metW - VSN-normalized wall proteomics matrix
-meta - Metadata data frame with columns: Treatment, Breed, ch4_dmi_binary (and sample IDs as rownames)
-annoD - Annotation data frame for digesta proteins (for the final protein extraction step)
