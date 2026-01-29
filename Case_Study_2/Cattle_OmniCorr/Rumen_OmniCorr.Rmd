@@ -1,0 +1,698 @@
+---
+title: "OmniCorr: Rumen Proteomics Analysis"
+author: "Wanxin Lai"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output:
+  html_document:
+    toc: true
+    toc_float: 
+      collapsed: true
+      smooth_scroll: true
+    toc_depth: 3
+    theme: flatly
+    highlight: tango
+    code_folding: hide
+    number_sections: false
+    df_print: paged
+    fig_width: 8
+    fig_height: 4
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE, message = FALSE, warning = FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.align = "center",
+  out.width = "100%"
+)
+
+options(stringsAsFactors = FALSE)
+
+
+# Load packages
+library(OmniCorr)
+library(tidyverse)
+library(WGCNA)
+library(pheatmap)
+library(cowplot)
+library(RColorBrewer)
+library(ggpubr)
+
+theme_set(theme_bw())
+```
+
+
+```{css, echo=FALSE}
+/* Clean up section headers */
+h1, h2, h3 {
+  margin-top: 2em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid #eee;
+}
+
+/* Better figure spacing */
+.figure {
+  margin: 2em 0;
+}
+
+/* Table styling */
+table {
+  margin: 1em auto;
+}
+
+/* Code block styling */
+pre {
+  max-height: 400px;
+  overflow-y: auto;
+}
+```
+
+```{r load normalised data and meta}
+load("OmniCorr_light/ciliates.rds")
+load("OmniCorr_light/fungi.rds")
+load("OmniCorr_light/archbac.rds")
+load("OmniCorr_light/metazoa.rds")
+load("OmniCorr_light/metL.rds")
+load("OmniCorr_light/metW.rds")
+load("OmniCorr_light/annoD.rds")
+load("OmniCorr_light/metadata.rds")
+```
+
+### WGCNA Module Detection {.tabset}
+
+```{r}
+#-------------------------------------------------------------------------------
+# WGCNA Module Detection
+#-------------------------------------------------------------------------------
+
+if (!file.exists("Modules_light.RData")) {
+  
+  minModuleSize = 20
+  
+  # Modules: ciliates proteomics
+  powers = c(c(1:10), seq(from = 12, to=20, by=2))
+  sft = pickSoftThreshold(t(ciliates), powerVector = powers, corFnc = "bicor", networkType = "signed", verbose = 0)
+  
+  cex1 = 0.9
+  plot(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
+       xlab="Soft Threshold (power)", ylab="Scale Free Topology Model Fit R^2", type="n",
+       main = paste("Scale independence"))
+  text(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
+       labels=powers, cex=cex1, col="red")
+  abline(h=0.80, col="red")
+  
+  power <- 9
+  
+  Ciliates.modules <- blockwiseModules(datExpr = t(ciliates),
+                                       power = power, 
+                                       maxBlockSize = 8000, 
+                                       minModuleSize = minModuleSize, 
+                                       networkType = "signed", 
+                                       corType = "bicor", 
+                                       maxPOutliers = 0.05, 
+                                       replaceMissingAdjacencies = TRUE, 
+                                       pamStage = F, 
+                                       deepSplit = 4, 
+                                       minKMEtoStay = 0.5, 
+                                       minCoreKME = 0.5, 
+                                       minCoreKMESize = 2, 
+                                       reassignThreshold = 0,
+                                       mergeCutHeight = 0.2)
+  
+  # Modules: fungi proteomics
+  powers = c(c(1:10), seq(from = 12, to=20, by=2))
+  sft = pickSoftThreshold(t(fungi), powerVector = powers, corFnc = "bicor", networkType = "signed", verbose = 0)
+  
+  plot(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
+       xlab="Soft Threshold (power)", ylab="Scale Free Topology Model Fit R^2", type="n",
+       main = paste("Scale independence"))
+  text(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
+       labels=powers, cex=cex1, col="red")
+  abline(h=0.80, col="red")
+  
+  power <- 14
+  
+  Fungi.modules <- blockwiseModules(datExpr = t(fungi),
+                                    power = power, 
+                                    maxBlockSize = 8000, 
+                                    networkType = "signed", 
+                                    corType = "bicor", 
+                                    maxPOutliers = 0.05, 
+                                    replaceMissingAdjacencies = TRUE, 
+                                    pamStage = F, 
+                                    deepSplit = 4, 
+                                    minModuleSize = 5, 
+                                    minKMEtoStay = 0.5, 
+                                    minCoreKME = 0.5, 
+                                    minCoreKMESize = 2, 
+                                    reassignThreshold = 0,
+                                    mergeCutHeight = 0.2)
+  
+  # Modules: Archae and Bacteria proteomics
+  powers = c(c(1:10), seq(from = 12, to=30, by=2))
+  sft = pickSoftThreshold(t(archbac), powerVector = powers, corFnc = "bicor", networkType = "signed", verbose = 0)
+  
+  plot(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
+       xlab="Soft Threshold (power)", ylab="Scale Free Topology Model Fit R^2", type="n",
+       main = paste("Scale independence"))
+  text(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
+       labels=powers, cex=cex1, col="red")
+  abline(h=0.80, col="red")
+  
+  power <- 9
+  
+  Archbac.modules <- blockwiseModules(datExpr = t(archbac),
+                                      power = power, 
+                                      maxBlockSize = 8000, 
+                                      networkType = "signed", 
+                                      corType = "bicor", 
+                                      maxPOutliers = 0.05, 
+                                      replaceMissingAdjacencies = TRUE, 
+                                      pamStage = F, 
+                                      deepSplit = 4, 
+                                      minModuleSize = minModuleSize, 
+                                      minKMEtoStay = 0.5, 
+                                      minCoreKME = 0.5, 
+                                      minCoreKMESize = 2, 
+                                      reassignThreshold = 0,
+                                      mergeCutHeight = 0.2)
+  
+  # Modules: Metazoa(Digesta) proteomics
+  powers = c(c(1:10), seq(from = 12, to=20, by=2))
+  sft = pickSoftThreshold(t(metazoa), powerVector = powers, corFnc = "bicor", networkType = "signed", verbose = 0)
+  
+  plot(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
+       xlab="Soft Threshold (power)", ylab="Scale Free Topology Model Fit R^2", type="n",
+       main = paste("Scale independence"))
+  text(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
+       labels=powers, cex=cex1, col="red")
+  abline(h=0.80, col="red")
+  
+  power <- 10
+  
+  Metazoa.modules <- blockwiseModules(datExpr = t(metazoa),
+                                      power = power, 
+                                      maxBlockSize = 8000, 
+                                      networkType = "signed", 
+                                      corType = "bicor", 
+                                      maxPOutliers = 0.05, 
+                                      replaceMissingAdjacencies = TRUE, 
+                                      pamStage = F, 
+                                      deepSplit = 4, 
+                                      minModuleSize = 5, 
+                                      minKMEtoStay = 0.5, 
+                                      minCoreKME = 0.5, 
+                                      minCoreKMESize = 2, 
+                                      reassignThreshold = 0,
+                                      mergeCutHeight = 0.2)
+  
+  # Modules: Metazoa(liver) proteomics
+  powers = c(c(1:10), seq(from = 12, to=20, by=2))
+  sft = pickSoftThreshold(t(metL), powerVector = powers, corFnc = "bicor", networkType = "signed", verbose = 0)
+  
+  plot(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
+       xlab="Soft Threshold (power)", ylab="Scale Free Topology Model Fit R^2", type="n",
+       main = paste("Scale independence"))
+  text(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
+       labels=powers, cex=cex1, col="red")
+  abline(h=0.80, col="red")
+  
+  power <- 14
+  
+  MetL.modules <- blockwiseModules(datExpr = t(metL),
+                                   power = power, 
+                                   maxBlockSize = 8000, 
+                                   networkType = "signed", 
+                                   corType = "bicor", 
+                                   maxPOutliers = 0.05, 
+                                   replaceMissingAdjacencies = TRUE, 
+                                   pamStage = F, 
+                                   deepSplit = 4, 
+                                   minModuleSize = 5, 
+                                   minKMEtoStay = 0.5, 
+                                   minCoreKME = 0.5, 
+                                   minCoreKMESize = 2, 
+                                   reassignThreshold = 0,
+                                   mergeCutHeight = 0.2)
+  
+  # Modules: Metazoa(wall) proteomics
+  powers = c(c(1:10), seq(from = 12, to=25, by=2))
+  sft = pickSoftThreshold(t(metW), powerVector = powers, corFnc = "bicor", networkType = "signed", verbose = 0)
+  
+  plot(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
+       xlab="Soft Threshold (power)", ylab="Scale Free Topology Model Fit R^2", type="n",
+       main = paste("Scale independence"))
+  text(sft$fitIndices[,1], -sign(sft$fitIndices[,3])*sft$fitIndices[,2],
+       labels=powers, cex=cex1, col="red")
+  abline(h=0.80, col="red")
+  
+  power <- 28
+  
+  MetW.modules <- blockwiseModules(datExpr = t(metW),
+                                   power = power, 
+                                   maxBlockSize = 8000, 
+                                   networkType = "signed", 
+                                   corType = "bicor", 
+                                   maxPOutliers = 0.05, 
+                                   replaceMissingAdjacencies = TRUE, 
+                                   pamStage = F, 
+                                   deepSplit = 4, 
+                                   minModuleSize = 5, 
+                                   minKMEtoStay = 0.5, 
+                                   minCoreKME = 0.5, 
+                                   minCoreKMESize = 2, 
+                                   reassignThreshold = 0,
+                                   mergeCutHeight = 0.2)
+  
+  save(Ciliates.modules, Fungi.modules, Archbac.modules, Metazoa.modules, MetL.modules, MetW.modules, file = "Modules_light.RData")
+  
+} else {
+  load("Modules_light.RData")
+}
+
+# Extract module eigengenes
+Ciliates_protmics <- Ciliates.modules$MEs
+Fungi_protmics <- Fungi.modules$MEs
+Archbac_protmics <- Archbac.modules$MEs
+Metazoa_protmics <- Metazoa.modules$MEs
+MetLiver_protmics <- MetL.modules$MEs
+MetWall_protmics <- MetW.modules$MEs
+```
+
+
+### Within-module correlation histograms  {.tabset}
+
+```{r}
+kME <- bicor(t(ciliates), Ciliates_protmics, maxPOutliers = 0.05)
+intra_cor <- c()
+for (i in 1:nrow(ciliates)) {
+  m <- Ciliates.modules$colors[i]
+  if (m != "grey") {
+    intra_cor[i] <- kME[i, paste0("ME", m)]
+  }
+}
+data.frame(Correlation = intra_cor) %>% 
+  ggplot(aes(x = Correlation)) +
+  geom_histogram() +
+  xlim(-1,1) +
+  ggtitle("Ciliates proteomics: Within module correlation")
+
+```
+
+```{r}
+kME <- bicor(t(archbac), Archbac_protmics, maxPOutliers = 0.05)
+intra_cor <- c()
+for (i in 1:nrow(archbac)) {
+  m <- Archbac.modules$colors[i]
+  if (m != "grey") {
+    intra_cor[i] <- kME[i, paste0("ME", m)]
+  }
+}
+data.frame(Correlation = intra_cor) %>% 
+  ggplot(aes(x = Correlation)) +
+  geom_histogram() +
+  xlim(-1,1) +
+  ggtitle("Archae and bacteria proteomics: Within module correlation")
+
+# Host Liver
+kME <- bicor(t(metL), MetLiver_protmics, maxPOutliers = 0.05)
+intra_cor <- c()
+for (i in 1:nrow(metL)) {
+  m <- MetL.modules$colors[i]
+  if (m != "grey") {
+    intra_cor[i] <- kME[i, paste0("ME", m)]
+  }
+}
+data.frame(Correlation = intra_cor) %>% 
+  ggplot(aes(x = Correlation)) +
+  geom_histogram() +
+  xlim(-1,1) +
+  ggtitle("Host(liver): Within module correlation")
+
+```
+
+```{r}
+kME <- bicor(t(metazoa), Metazoa_protmics, maxPOutliers = 0.05)
+intra_cor <- c()
+for (i in 1:nrow(metazoa)) {
+  m <- Metazoa.modules$colors[i]
+  if (m != "grey") {
+    intra_cor[i] <- kME[i, paste0("ME", m)]
+  }
+}
+data.frame(Correlation = intra_cor) %>% 
+  ggplot(aes(x = Correlation)) +
+  geom_histogram() +
+  xlim(-1,1) +
+  ggtitle("Metazoa proteomics: Within module correlation")
+```
+
+```{r}
+kME <- bicor(t(metW), MetWall_protmics, maxPOutliers = 0.05)
+intra_cor <- c()
+for (i in 1:nrow(metW)) {
+  m <- MetW.modules$colors[i]
+  if (m != "grey") {
+    intra_cor[i] <- kME[i, paste0("ME", m)]
+  }
+}
+data.frame(Correlation = intra_cor) %>% 
+  ggplot(aes(x = Correlation)) +
+  geom_histogram() +
+  xlim(-1,1) +
+  ggtitle("Host Wall: Within module correlation")
+```
+
+
+### Step 1: Hierarchical clustering of the central omics layer {.tabset}
+```{r}
+dendro.rows <- hclust(as.dist(1 - WGCNA::bicor(Archbac_protmics, maxPOutliers = 0.05)), method = "ward.D2")
+dendro.cols <- hclust(as.dist(1 - WGCNA::bicor(t(Archbac_protmics), maxPOutliers = 0.05)), method = "ward.D2")
+plot(dendro.rows)
+```
+
+
+### Step 2: Generate heatmap of central omics layer
+```{r}
+result2 <- pheatmap::pheatmap(t(Archbac_protmics)[,dendro.cols$order], 
+                              cluster_rows = dendro.rows, 
+                              cluster_cols = dendro.cols, treeheight_col = 0, 
+                              show_rownames = T, 
+                              main = paste("Methanogenic","& archae bacteria", sep = "\n"),
+                              annotation_col = meta %>% select(Treatment, Breed), 
+                              annotation_legend = T)
+```
+
+### Step 3: Calculate correlations between omics data
+
+```{r}
+# Archbac vs Metazoa (Host Digesta)
+
+result3 <- calculate_correlations(df1 = Archbac_protmics, 
+                                  df2 = Metazoa_protmics,
+                                  method = "pearson",
+                                  show_significance = "stars")
+
+p_values_numeric <- apply(result3$p_value, 2, as.numeric)
+cols_to_keep <- as.data.frame(p_values_numeric, row.names = rownames(result3$p_value))["MEdarkgreen",] < 0.05
+
+result3$p_value <- result3$p_value[, cols_to_keep]
+result3$correlation <- result3$correlation[, cols_to_keep]
+result3$signif_matrix <- result3$signif_matrix[, cols_to_keep]
+
+
+
+# Archbac vs Ciliates
+
+result3.1 <- calculate_correlations(df1 = Archbac_protmics, 
+                                    df2 = Ciliates_protmics,
+                                    method = "pearson",
+                                    show_significance = "stars")
+
+p_values_numeric <- apply(result3.1$p_value, 2, as.numeric)
+cols_to_keep <- as.data.frame(p_values_numeric, row.names = rownames(result3.1$p_value))["MEdarkgreen",] < 0.05
+
+result3.1$p_value <- result3.1$p_value[, cols_to_keep]
+result3.1$correlation <- result3.1$correlation[, cols_to_keep]
+result3.1$signif_matrix <- result3.1$signif_matrix[, cols_to_keep]
+
+# Archbac vs Fungi
+result3.2 <- calculate_correlations(df1 = Archbac_protmics, 
+                                    df2 = Fungi_protmics,
+                                    method = "pearson",
+                                    show_significance = "stars")
+
+p_values_numeric <- apply(result3.2$p_value, 2, as.numeric)
+cols_to_keep <- as.data.frame(p_values_numeric, row.names = rownames(result3.2$p_value))["MEdarkgreen",] < 0.05
+
+result3.2$p_value <- result3.2$p_value[, cols_to_keep]
+result3.2$correlation <- result3.2$correlation[, cols_to_keep]
+result3.2$signif_matrix <- result3.2$signif_matrix[, cols_to_keep]
+```
+
+### Step 4: Generate a heatmap of the correlations between the central layer and other layers
+
+```{r}
+heatmap_colors <- colorRampPalette(rev(RColorBrewer::brewer.pal(n = 6, name ="RdBu")))(51)
+
+result4 <- pheatmap::pheatmap(result3$correlation, 
+                              color = heatmap_colors, 
+                              treeheight_col = 0, 
+                              treeheight_row = 0,
+                              cluster_rows = dendro.rows,
+                              cluster_cols = T,
+                              display_numbers = result3$signif_matrix, 
+                              breaks = seq(from = -1, to = 1, length.out = 51), 
+                              show_rownames = F, legend = F,
+                              labels_row = paste0(rownames(result3$correlation)),
+                              labels_col = paste0(colnames(result3$correlation)),
+                              main = paste("Host", "\n (Digesta Fluid)", sep = ""))
+
+result4.1 <- pheatmap::pheatmap(result3.1$correlation, 
+                                color = heatmap_colors, 
+                                treeheight_col = 0, 
+                                treeheight_row = 0,
+                                cluster_rows = dendro.rows,
+                                display_numbers = result3.1$signif_matrix, 
+                                breaks = seq(from = -1, to = 1, length.out = 51), 
+                                show_rownames = F, legend = F,
+                                labels_row = paste0(rownames(result3.1$correlation)),
+                                labels_col = paste0(colnames(result3.1$correlation)),
+                                main = paste("Ciliates", "\n (Digesta Fluid)", sep = ""))
+
+result4.2 <- pheatmap::pheatmap(result3.2$correlation, 
+                                color = heatmap_colors, 
+                                treeheight_col = 0, 
+                                treeheight_row = 0,
+                                cluster_rows = dendro.rows,
+                                display_numbers = result3.2$signif_matrix, 
+                                breaks = seq(from = -1, to = 1, length.out = 51), 
+                                show_rownames = F, legend = F,
+                                labels_row = paste0(rownames(result3.2$correlation)),
+                                labels_col = paste0(colnames(result3.2$correlation)),
+                                main = paste("Fungi", "\n (Digesta Fluid)", sep = ""))
+```
+
+#### Initial integration of heatmap
+```{r fig.width=18, fig.height=10}
+cowplot::plot_grid(result2$gtable, 
+                   result4$gtable,
+                   result4.1$gtable,
+                   result4.2$gtable,
+                   ncol = 4, align = 'h',
+                   rel_widths = c(1.5, 0.8, 1.6, 0.5)) + 
+  ggplot2::theme(plot.margin = ggplot2::unit(c(2,1,1,1), "cm"))
+```
+
+```{r echo=FALSE}
+#-------------------------------------------------------------------------------
+# Helper function: generate significance stars from p-values
+#-------------------------------------------------------------------------------
+
+generate_stars <- function(p_value_matrix) {
+  p_numeric <- apply(p_value_matrix, 2, as.numeric)
+  signif_matrix <- matrix("", nrow = nrow(p_numeric), ncol = ncol(p_numeric),
+                          dimnames = list(rownames(p_value_matrix), colnames(p_value_matrix)))
+  signif_matrix[p_numeric <= 0.05] <- "*"
+  signif_matrix[p_numeric <= 0.01] <- "**"
+  signif_matrix[p_numeric <= 0.001] <- "***"
+  return(signif_matrix)
+}
+```
+
+```{r }
+meta_cln <- meta %>% 
+  mutate(Breed = as.numeric(factor(Breed)) - 1) %>% 
+  mutate(ch4_dmi_binary = as.numeric(factor(ch4_dmi_binary, levels = c("low", "high"))) - 1)
+
+meta_cln <- meta_cln[rownames(Archbac_protmics), ]
+
+# Correlation with metadata
+result_pheno_H <- calculate_correlations(df1 = Archbac_protmics, 
+                                         df2 = meta_cln[rownames(Archbac_protmics),] %>% select(Breed, ch4_dmi_binary), 
+                                         use = "pairwise.complete.obs",
+                                         method = "pearson",
+                                         show_significance = "stars")
+result_pheno_H$signif_matrix <- generate_stars(result_pheno_H$p_value)
+
+# Identify key modules (significant association with metadata)
+p_value_df <- as.data.frame(result_pheno_H$p_value, row.names = rownames(result_pheno_H$p_value))
+rows_to_keep <- apply(p_value_df, 1, function(row) any(as.numeric(row) <= 0.05))
+key_modules <- rownames(p_value_df[rows_to_keep,])
+
+# Correlation with Liver
+result_pheno_L <- calculate_correlations(df1 = Archbac_protmics, 
+                                         df2 = MetLiver_protmics[rownames(Archbac_protmics),], 
+                                         use = "pairwise.complete.obs",
+                                         method = "pearson",
+                                         show_significance = "stars")
+result_pheno_L$signif_matrix <- generate_stars(result_pheno_L$p_value)
+
+p_val_numeric <- apply(result_pheno_L$p_value, 2, as.numeric)
+cols_to_keep <- apply(
+  as.data.frame(p_val_numeric, row.names = rownames(result_pheno_L$p_value))[key_modules, , drop = FALSE], 
+  2, 
+  function(col) any(col < 0.05, na.rm = TRUE)
+)
+
+result_pheno_L$p_value <- result_pheno_L$p_value[, cols_to_keep]
+result_pheno_L$correlation <- result_pheno_L$correlation[, cols_to_keep]
+result_pheno_L$signif_matrix <- result_pheno_L$signif_matrix[, cols_to_keep]
+
+# Correlation with Wall
+result_pheno_W <- calculate_correlations(df1 = Archbac_protmics, 
+                                         df2 = MetWall_protmics, 
+                                         use = "pairwise.complete.obs",
+                                         method = "pearson",
+                                         show_significance = "stars")
+result_pheno_W$signif_matrix <- generate_stars(result_pheno_W$p_value)
+
+p_val_numeric <- apply(result_pheno_W$p_value, 2, as.numeric)
+cols_to_keep <- apply(
+  as.data.frame(p_val_numeric, row.names = rownames(result_pheno_W$p_value))[key_modules, , drop = FALSE], 
+  2, 
+  function(col) any(col < 0.05, na.rm = TRUE)
+)
+
+result_pheno_W$p_value <- result_pheno_W$p_value[, cols_to_keep]
+result_pheno_W$correlation <- result_pheno_W$correlation[, cols_to_keep]
+result_pheno_W$signif_matrix <- result_pheno_W$signif_matrix[, cols_to_keep]
+```
+
+#### One module from the METADATA passed the significance test:
+```{r fig.width=8}
+heatmap_colors <- colorRampPalette(rev(RColorBrewer::brewer.pal(n = 6, name ="RdBu")))(51)
+
+result5 <- pheatmap::pheatmap(result_pheno_H$correlation, 
+                              color = heatmap_colors, 
+                              treeheight_col = 0, 
+                              treeheight_row = 0,
+                              cluster_rows = dendro.rows,
+                              display_numbers = result_pheno_H$signif_matrix, 
+                              breaks = seq(from = -1, to = 1, length.out = 51), 
+                              show_rownames = F, legend = F,
+                              labels_row = paste0(rownames(result_pheno_H$correlation)),
+                              labels_col = paste0(colnames(result_pheno_H$correlation)),
+                              main = paste("Metadata"))
+
+result6 <- pheatmap::pheatmap(result_pheno_W$correlation, 
+                              color = heatmap_colors, 
+                              treeheight_col = 0, 
+                              treeheight_row = 0,
+                              cluster_rows = dendro.rows,
+                              display_numbers = result_pheno_W$signif_matrix, 
+                              breaks = seq(from = -1, to = 1, length.out = 51), 
+                              show_rownames = F, legend = T,
+                              labels_row = paste0(rownames(result_pheno_W$correlation)),
+                              labels_col = paste0(colnames(result_pheno_W$correlation)),
+                              main = paste("Host", "\n (Digesta Wall)", sep = ""))
+
+result7 <- pheatmap::pheatmap(result_pheno_L$correlation, 
+                              color = heatmap_colors, 
+                              treeheight_col = 0, 
+                              treeheight_row = 0,
+                              cluster_rows = dendro.rows,
+                              display_numbers = result_pheno_L$signif_matrix, 
+                              breaks = seq(from = -1, to = 1, length.out = 51), 
+                              show_rownames = F, legend = F,
+                              labels_row = paste0(rownames(result_pheno_L$correlation)),
+                              labels_col = paste0(colnames(result_pheno_L$correlation)),
+                              main = paste("Host Liver"))
+```
+
+### Step 5: Integration of final heatmap
+```{r  fig.width=18, fig.height=10}
+# Figure: Metadata + Central + Wall + Liver
+# Full multi-omics
+cowplot::plot_grid(result5$gtable,
+                   result2$gtable,
+                   result4.1$gtable,
+                   result4.2$gtable,
+                   result4$gtable,
+                   result7$gtable,
+                   result6$gtable,
+                   ncol = 7,
+                   align = 'h',
+                   rel_widths = c(0.1, 1.5, 0.3, 0.1, 0.25, 0.45, 0.2)) + 
+  ggplot2::theme(plot.margin = ggplot2::unit(c(1.8,1,1,1), "cm"))
+```
+
+
+--------------------------------------------------------------
+### Extract proteins from the only significant module:
+```{r}
+
+data.frame(Module = Archbac.modules$colors) %>% 
+  rownames_to_column(var = "Protein") %>% 
+  filter(Module == "black") %>% 
+  pull(Protein) -> proteins
+
+selected_protein_info <- data.frame()
+for(i in 1:length(as.vector(proteins))){
+  holder <- annoD[annoD$protein == as.vector(proteins)[i],]
+  selected_protein_info <- rbind(selected_protein_info, holder)
+}
+
+selected_archbac <- selected_protein_info[,c("protein","tax_kingdom", "tax_phylum", "tax_species","Description", "KEGG_ko", "KEGG_Pathway", "KEGG_Module", "EC", "GOs", "CAZy")] %>% unique()
+
+selected_archbac$KEGG_Module %>% unique()
+```
+
+#### Significant module from the central omics
+```{r}
+### Interesting module
+
+data.frame(CH4_dmi = meta_cln[rownames(Archbac_protmics),]$ch4_dmi_binary, Proteomics = Archbac_protmics$MEdarkgreen) %>% 
+   #mutate(CH4_dmi = factor(CH4_dmi)) %>% 
+   ggplot(aes(x = CH4_dmi, y = Proteomics)) +
+    #geom_boxplot(aes(colour = CH4_dmi), outlier.shape = NA, alpha = 0.5) +
+    geom_point(aes(colour = CH4_dmi),size = 2, alpha = 0.5) +
+    geom_smooth(method = "lm", formula = y ~ as.numeric(x)) +
+    stat_cor(label.y = max(Archbac_protmics$MEdarkgreen)+0.05) +
+    scale_colour_gradient(low = "#66FF33", high = "#FF3399") +
+    #stat_compare_means(label = "p.format", tip.length = 0, vjust = 0.5) +
+    ggtitle("Module: darkgreen")
+
+
+```
+
+
+
+```{r}
+net_results <- list(Archbac.modules,
+                    Ciliates.modules,
+                    Fungi.modules,
+                    Metazoa.modules,
+                    MetL.modules,
+                    MetW.modules)
+
+for (i in 1:6) {
+  net_results[[i]]$group_index <- groups$group_index[i]
+}
+
+```
+
+
+```{r for enrichment in github}
+# Save objects needed for KEGG enrichment analysis
+save(
+  # WGCNA modules
+  Archbac.modules, Ciliates.modules, Fungi.modules, 
+  Metazoa.modules, MetL.modules, MetW.modules,
+  # Metadata
+  meta,
+  # Correlation results
+  result_pheno_L, result_pheno_W, result3, result3.1, result3.2,
+  # Key modules
+  key_modules,
+  net_results,
+  file = "OmniCorr_light/for_kegg_inputs.RData"
+)
+```
+
+
+
+

@@ -1,0 +1,213 @@
+---
+title: "KEGG Functional Enrichment Analysis"
+author: "Wanxin Lai"
+date: "`r format(Sys.time(), '%d %B %Y')`"
+output:
+  html_document:
+    toc: true
+    toc_float: 
+      collapsed: true
+      smooth_scroll: true
+    toc_depth: 3
+    theme: flatly
+    highlight: tango
+    code_folding: hide
+    number_sections: false
+    fig_width: 12
+    fig_height: 10
+editor_options: 
+  chunk_output_type: console
+---
+```{r setup, include=FALSE, message = FALSE, warning = FALSE}
+knitr::opts_chunk$set(
+
+  echo = TRUE,
+  warning = FALSE,
+  message = FALSE,
+  fig.align = "center",
+  out.width = "100%"
+)
+
+options(stringsAsFactors = FALSE)
+
+library(tidyverse)
+library(clusterProfiler)
+library(cowplot)
+```
+
+```{css, echo=FALSE}
+h1, h2, h3 {
+  margin-top: 2em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid #eee;
+}
+
+.figure {
+  margin: 2em 0;
+}
+
+pre {
+  max-height: 400px;
+  overflow-y: auto;
+}
+```
+
+
+#KEGG Functional Enrichment Analysis
+
+After running the previous script (Rumen_OmniCorr), remember to save the required objects (for_kegg_inputs.RData). 
+Example:
+```{r eval=FALSE}
+# Save objects needed for KEGG enrichment analysis
+save(
+  # WGCNA modules
+  Archbac.modules, Ciliates.modules, Fungi.modules, 
+  Metazoa.modules, MetL.modules, MetW.modules,
+  # Metadata
+  meta,
+  # Correlation results
+  result_pheno_L, result_pheno_W, result3, result3.1, result3.2,
+  # Key modules
+  key_modules,
+  file = "OmniCorr_light/for_kegg_inputs.RData"
+)
+```
+
+
+#### Declaration and Data Availability
+
+The KEGG functional enrichment analyses and visualizations shown in this document are **not part of the OmniCorr package** and are provided solely as an external, illustrative example of downstream analysis.
+
+KEGG pathway annotations and mappings are subject to the KEGG licensing terms and are **not redistributable**. Accordingly, raw KEGG databases and full annotation files are not included in this repository or report.
+
+All analyses shown here rely on locally obtained KEGG annotation files. To ensure reproducibility without redistributing restricted resources, we display only summarized results and example data structures where appropriate.
+
+
+# Load Data
+```{r load module results}
+load("OmniCorr_light/for_kegg_inputs.RData")
+```
+
+```{r include=FALSE, echo=FALSE}
+kegg_data_raw <- read_tsv("C:/Users/awala/OneDrive - Norwegian University of Life Sciences/Documents/Small_Cow2_metaG/OmniCorr_Cow/kegg_data.tsv")
+
+kegg_data <- kegg_data_raw %>%
+  rename(ko_id = ortholog_ko)
+
+groups <- read_tsv("C:/Users/awala/OneDrive - Norwegian University of Life Sciences/Documents/Small_Cow2_metaG/OmniCorr_Cow/grouping_name_index.tsv")
+```
+
+# Prepare Module Results
+```{r prepare-modules}
+net_results <- list(
+  Archbac.modules,
+  Ciliates.modules,
+  Fungi.modules,
+  Metazoa.modules,
+  MetL.modules,
+  MetW.modules
+)
+
+for (i in 1:6) {
+  net_results[[i]]$group_index <- groups$group_index[i]
+}
+
+head(net_results)
+```
+
+
+## KEGG Annotations structure
+This is how the structure looks like:
+```{r kegg-housekeeping, include=FALSE}
+annotations_file <- "C:/Users/awala/OneDrive - Norwegian University of Life Sciences/Documents/Small_Cow2_metaG/OmniCorr_Cow/results/annotation/annotation.emapper.annotations"
+annotations_raw <- read_tsv(annotations_file, skip = 4, comment = "##", na = "-")
+
+annotations_all <- annotations_raw %>%
+  rename(query = `#query`) %>%
+  separate_wider_regex(
+    query,
+    c(
+      database_short = "^db[A-Z]",
+      "\\d*\\|",
+      protein_short = "[^ ]+",
+      ".*$"
+    ),
+    cols_remove = FALSE
+  ) %>%
+  mutate(protein = paste0(database_short, "|", protein_short)) %>%
+  relocate(protein)
+
+annotations <- annotations_all %>%
+  select(-database_short, -protein_short, -query)
+
+rm(annotations_all, annotations_raw)
+
+```
+
+```{r}
+head(annotations)
+```
+
+
+## Group structure for the analysis below
+Groups correspond to OmniCorr-derived network partitions used as input for enrichment analysis.
+```{r}
+head(groups)
+```
+
+
+```{r kegg-hierarchy}
+pathway_hierarchy <- kegg_data %>%
+  distinct(pathway_class = class, pathway_group = group, pathway) %>%
+  arrange(pathway_class, pathway_group, pathway)
+
+term2gene <- kegg_data %>%
+  select(term = pathway, gene = ko_id)
+```
+
+# Pathway Enrichment Analysis
+Module-level enrichment output. The resulting table contains pathway-level statistics per module.
+```{r enrichment-analysis}
+pe_analyses <- list()
+
+for(i in seq_along(net_results)){
+  message("Processing group ", i)
+  
+  group_index_value <- i 
+  
+  group_annotated <- stack(net_results[[group_index_value]]$colors) %>% 
+    rename(protein = ind, module = values) %>%
+    left_join(annotations, by = "protein") %>%  
+    group_by(module) %>%
+    drop_na(KEGG_ko) %>%
+    mutate(ko_extraction = str_split(KEGG_ko, ",")) %>%
+    unnest(ko_extraction) %>%
+    mutate(ko = str_extract(ko_extraction, "ko:(K\\d+)", group = 1)) %>%
+    select(-KEGG_ko, -ko_extraction)
+  
+  enrichment_results <- group_annotated %>%
+    group_by(module) %>%
+    summarize(ko_genes = list(ko), .groups = 'drop') %>%
+    mutate(enrichment_result = map(ko_genes, ~ {
+      result <- clusterProfiler::enricher(.x, TERM2GENE = term2gene)
+      as.data.frame(result)
+    })) %>%
+    unnest(enrichment_result) %>%
+    select(-ko_genes) %>%
+    rename(pathway = ID) %>%
+    mutate(group_index = group_index_value)
+  
+  pe_analyses[[i]] <- enrichment_results
+}
+
+final_results <- bind_rows(pe_analyses)
+
+head(final_results)
+```
+
+
+
+# Session Info
+```{r session-info}
+sessionInfo()
+```
