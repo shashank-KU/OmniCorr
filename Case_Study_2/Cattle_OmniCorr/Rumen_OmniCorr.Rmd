@@ -71,14 +71,14 @@ pre {
 ```
 
 ```{r load normalised data and meta}
-load("OmniCorr_light/ciliates.rds")
-load("OmniCorr_light/fungi.rds")
-load("OmniCorr_light/archbac.rds")
-load("OmniCorr_light/metazoa.rds")
-load("OmniCorr_light/metL.rds")
-load("OmniCorr_light/metW.rds")
-load("OmniCorr_light/annoD.rds")
-load("OmniCorr_light/metadata.rds")
+load("OmniCorr_light/ciliates.RData")
+load("OmniCorr_light/fungi.RData")
+load("OmniCorr_light/archbac.RData")
+load("OmniCorr_light/metazoa.RData")
+load("OmniCorr_light/metL.RData")
+load("OmniCorr_light/metW.RData")
+load("OmniCorr_light/annoD.RDataa")
+load("OmniCorr_light/metadata.RData")
 ```
 
 ### WGCNA Module Detection {.tabset}
@@ -656,22 +656,6 @@ data.frame(CH4_dmi = meta_cln[rownames(Archbac_protmics),]$ch4_dmi_binary, Prote
     #stat_compare_means(label = "p.format", tip.length = 0, vjust = 0.5) +
     ggtitle("Module: darkgreen")
 
-
-```
-
-
-
-```{r}
-net_results <- list(Archbac.modules,
-                    Ciliates.modules,
-                    Fungi.modules,
-                    Metazoa.modules,
-                    MetL.modules,
-                    MetW.modules)
-
-for (i in 1:6) {
-  net_results[[i]]$group_index <- groups$group_index[i]
-}
 
 ```
 
