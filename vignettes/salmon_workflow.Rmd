@@ -1,0 +1,229 @@
+```
+---
+title: "OmniCorr: Salmon multi-omics integration workflow"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{OmniCorr – Salmon Workflow}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Overview
+
+This vignette demonstrates the **core OmniCorr workflow** using the salmon multi-omics dataset  
+(which serves as the main example in the OmniCorr manuscript).
+
+Main steps shown in this document:
+
+- Loading processed example data  
+- Checking & fixing sample alignment  
+- Computing cross-omics correlations  
+- Visualizing results using aligned heatmaps
+
+All preprocessing steps (from raw sequencing → processed data)  
+are provided separately in the `raw-data/` directory of the repository.
+
+### Data provenance & preprocessing
+
+The example datasets distributed with **OmniCorr** were generated from:
+
+- Transcriptomics  
+- Metagenomics  
+- Metatranscriptomics
+
+Complete preprocessing workflows (normalization, filtering, WGCNA-based feature clustering, etc.)  
+are documented in:
+
+```
+raw-data/
+├── transcriptomics/
+│   └── Transcriptomics_preprocessing.Rmd
+├── metagenomics/
+│   └── Metagenomics_preprocessing.Rmd
+└── metatranscriptomics/
+    └── Metatranscriptomics_preprocessing.Rmd
+```
+
+The final processed objects are saved as `.rda` files and shipped with the package.
+
+## Load OmniCorr + example data
+
+```r
+library(OmniCorr)
+
+data(Transcriptomics)
+data(Metagenomics)
+data(Metatranscriptomics)
+data(metadata)
+```
+
+**Each dataset contains:**
+
+- **rows** = samples  
+- **columns** = features / modules / hubs / taxa / ...
+
+## Very important: Sample alignment (required!)
+
+All omics layers **must** contain exactly the same samples in the **same order**.
+
+```r
+# Quick check
+all(
+  rownames(Transcriptomics) == rownames(Metagenomics) &
+  rownames(Transcriptomics) == rownames(Metatranscriptomics)
+)
+```
+
+If order is wrong / samples are missing → use the helper function:
+
+```r
+df_list <- CheckSampleOrder(Transcriptomics, Metagenomics, Metatranscriptomics)
+
+Transcriptomics   <- df_list[[1]]
+Metagenomics      <- df_list[[2]]
+Metatranscriptomics <- df_list[[3]]
+```
+
+## Workflow steps
+
+### Step 1 – Feature clustering (using reference layer = Transcriptomics)
+
+```r
+library(WGCNA)
+
+dendro <- hclust(
+  dist = as.dist(1 - bicor(Transcriptomics, maxPOutliers = 0.05)),
+  method = "ward.D2"
+)
+```
+
+### Step 2 – Transcriptomics reference heatmap
+
+```r
+library(pheatmap)
+
+tx_heatmap <- pheatmap(
+  t(Transcriptomics),
+  cluster_rows = dendro,
+  cluster_cols  = FALSE,
+  show_rownames = FALSE,
+  main          = "Transcriptomics"
+)
+```
+
+→ This heatmap will serve as **structural backbone** for all following plots
+
+### Step 3 – Cross-omics correlation analysis
+
+```r
+# Transcriptomics ↔ Metagenomics
+corr_mg <- calculate_correlations(
+  df1 = Transcriptomics,
+  df2 = Metagenomics,
+  show_significance = "stars"
+)
+
+# Transcriptomics ↔ Metatranscriptomics
+corr_mt <- calculate_correlations(
+  df1 = Transcriptomics,
+  df2 = Metatranscriptomics,
+  show_significance = "stars"
+)
+```
+
+Each result contains:
+
+- `$correlation`  
+- `$pval`  
+- `$padj`  
+- `$signif_matrix` (the stars/symbols matrix)
+
+### Step 4 – Beautiful aligned correlation heatmaps
+
+```r
+library(RColorBrewer)
+
+heatmap_colors <- colorRampPalette(rev(brewer.pal(11, "RdBu")))(51)
+
+
+# Metagenomics correlations
+hm_mg <- pheatmap(
+  corr_mg$correlation,
+  color         = heatmap_colors,
+  cluster_rows  = dendro,
+  display_numbers = corr_mg$signif_matrix,
+  breaks        = seq(-1, 1, length.out = 51),
+  show_rownames = FALSE,
+  legend        = FALSE,
+  main          = "Metagenomics"
+)
+
+
+# Metatranscriptomics correlations
+hm_mt <- pheatmap(
+  corr_mt$correlation,
+  color         = heatmap_colors,
+  cluster_rows  = dendro,
+  display_numbers = corr_mt$signif_matrix,
+  breaks        = seq(-1, 1, length.out = 51),
+  show_rownames = TRUE,
+  legend        = TRUE,
+  main          = "Metatranscriptomics"
+)
+```
+
+### Nice combined layout (optional but very recommended)
+
+```r
+library(cowplot)
+
+plot_grid(
+  tx_heatmap$gtable,
+  hm_mg$gtable,
+  hm_mt$gtable,
+  ncol       = 3,
+  align      = "h",
+  rel_widths = c(3, 1.3, 2.2)
+)
+```
+
+### Bonus: Correlation with metadata
+
+```r
+corr_meta <- calculate_correlations(
+  df1 = Transcriptomics,
+  df2 = metadata,
+  use = "pairwise.complete.obs",
+  show_significance = "stars"
+)
+
+pheatmap(
+  corr_meta$correlation,
+  color         = heatmap_colors,
+  cluster_rows  = dendro,
+  display_numbers = corr_meta$signif_matrix,
+  breaks        = seq(-1, 1, length.out = 51),
+  show_rownames = TRUE,
+  main          = "Environmental variables / Metadata"
+)
+```
+
+## Summary
+
+This vignette shows the **core OmniCorr workflow** using the salmon multi-omics example.
+
+**Where to look next:**
+
+- Full preprocessing → `raw-data/` folder  
+- All processed example data → inside the package (`data()`)
+- Other case studies → look for additional vignettes (cattle)
+
+Good luck with your multi-omics integration projects! 🐟
+```
