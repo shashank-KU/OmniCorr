@@ -32,7 +32,7 @@ save(
   meta,
   result_pheno_L, result_pheno_W, result3, result3.1, result3.2,
   key_modules,
-  file = "OmniCorr_light/for_kegg_inputs.RData"
+  file = "for_kegg_inputs.RData"
 )
 ```
 
