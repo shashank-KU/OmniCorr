@@ -71,24 +71,24 @@ pre {
 ```
 
 ```{r load normalised data and meta}
-load("OmniCorr_light/ciliates.RData")
-load("OmniCorr_light/fungi.RData")
-load("OmniCorr_light/archbac.RData")
-load("OmniCorr_light/metazoa.RData")
-load("OmniCorr_light/metL.RData")
-load("OmniCorr_light/metW.RData")
-load("OmniCorr_light/annoD.RDataa")
-load("OmniCorr_light/metadata.RData")
+load("data/ciliates.rds")
+load("data/fungi.rds")
+load("data/archbac.rds")
+load("data/metazoa.rds")
+load("data/metL.rds")
+load("data/metW.rds")
+load("data/annoD.rds")
+load("data/metadata.rds")
 ```
 
 ### WGCNA Module Detection {.tabset}
 
-```{r}
+```{r, results='hide'}
 #-------------------------------------------------------------------------------
 # WGCNA Module Detection
 #-------------------------------------------------------------------------------
 
-if (!file.exists("Modules_light.RData")) {
+if (!file.exists("Modules_rumen.RData")) {
   
   minModuleSize = 20
   
@@ -267,10 +267,10 @@ if (!file.exists("Modules_light.RData")) {
                                    reassignThreshold = 0,
                                    mergeCutHeight = 0.2)
   
-  save(Ciliates.modules, Fungi.modules, Archbac.modules, Metazoa.modules, MetL.modules, MetW.modules, file = "Modules_light.RData")
+  save(Ciliates.modules, Fungi.modules, Archbac.modules, Metazoa.modules, MetL.modules, MetW.modules, file = "Modules_rumen.RData")
   
 } else {
-  load("Modules_light.RData")
+  load("Modules_rumen.RData")
 }
 
 # Extract module eigengenes
@@ -660,7 +660,8 @@ data.frame(CH4_dmi = meta_cln[rownames(Archbac_protmics),]$ch4_dmi_binary, Prote
 ```
 
 
-```{r for enrichment in github}
+
+```{r for enrichment in github, eval=FALSE}
 # Save objects needed for KEGG enrichment analysis
 save(
   # WGCNA modules
@@ -672,8 +673,8 @@ save(
   result_pheno_L, result_pheno_W, result3, result3.1, result3.2,
   # Key modules
   key_modules,
-  net_results,
-  file = "OmniCorr_light/for_kegg_inputs.RData"
+  #net_results,
+  file = "for_kegg_inputs.RData"
 )
 ```
 
