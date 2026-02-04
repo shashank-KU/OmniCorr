@@ -223,7 +223,7 @@ This vignette shows the **core OmniCorr workflow** using the salmon multi-omics 
 
 - Full preprocessing → `raw-data/` folder  
 - All processed example data → inside the package (`data()`)
-- Other case studies → look for additional vignettes (cattle)
+- Other case studies → look for Case_Study_2 (cattle)
 
 Good luck with your multi-omics integration projects! 🐟
 ```
