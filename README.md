@@ -1,7 +1,5 @@
 
 # OmniCorr
-<img width="1536" height="1024" alt="ChatGPT Image Feb 18, 2026, 10_23_46 AM" src="https://github.com/user-attachments/assets/c2ae0545-e716-4cd0-a5d1-43fff6090fe1" />
-
 <img width="6000" height="4200" alt="Omnicorr (1)" src="https://github.com/user-attachments/assets/17cd5615-122c-4248-92b0-ec4ccde4cf3f" />
 
 <!-- badges: start -->
