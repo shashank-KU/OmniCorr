@@ -1,6 +1,6 @@
 Package: OmniCorr
 Title: Multi-omics Integration and Visualization Framework
-Version: 0.1.2
+Version: 0.2.0
 Authors@R: 
     person(
         "Shashank", "Gupta",
@@ -25,6 +25,7 @@ Depends:
     R (>= 3.6)
 Imports: 
     cowplot,
+    ComplexHeatmap,
     dplyr,
     ggplot2,
     magrittr,
