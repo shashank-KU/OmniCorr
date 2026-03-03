@@ -263,3 +263,36 @@ cowplot::plot_grid(
 ```
 ![Rplot01](https://user-images.githubusercontent.com/30895959/223760509-8c3d8f8e-d232-4c0c-8832-9aa4c1ecf5d9.png)
 
+
+## Fully Automated Multi-Omics Integration
+OmniCorr provides a single high-level function, `run_omnicorr()`, that performs the complete integration workflow automatically.
+No manual clustering, dendrogram creation, heatmap alignment, or p-value formatting is required.
+
+The function internally performs:
+
+- Sample alignment validation
+
+- Reference feature clustering (optional, enabled by default)
+
+- Pairwise cross-omics correlation calculation
+
+- Multiple testing correction (FDR by default)
+
+- Significance annotation (stars, p-values, or correlations)
+
+- Construction of aligned multi-panel heatmaps
+
+Run the full integration with one command:
+``` r
+run_omnicorr(
+  reference_layer = Transcriptomics,
+  comparison_layers = list(
+    Metagenomics = Metagenomics,
+    Metatranscriptomics = Metatranscriptomics
+  ),
+  metadata = metadata
+)
+```
+<img width="2600" height="1600" alt="Omnicorr" src="https://github.com/user-attachments/assets/3fc96855-0898-4598-986f-efa97e1036a9" />
+
+
