@@ -4,6 +4,7 @@ export(CheckSampleOrder)
 export(calculate_correlations)
 export(metadata)
 export(run_omnicorr)
+
 importFrom(stats,complete.cases)
 importFrom(stats,cor)
 importFrom(stats,cor.test)

@@ -1,2 +1,0 @@
-Proteomics data from 22 cattles (two breeds) 
-Methane emission (above or below 24 CH4 g/kg DMI)

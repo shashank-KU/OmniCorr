@@ -1,9 +1,17 @@
 
 # OmniCorr
+<img width="6000" height="4200" alt="Omnicorr (1)" src="https://github.com/user-attachments/assets/17cd5615-122c-4248-92b0-ec4ccde4cf3f" />
 
 <!-- badges: start -->
-<!-- badges: end -->
 
+[![Publication](https://img.shields.io/badge/Publication-Bioinformatics%20Advances-blue)](https://academic.oup.com/bioinformaticsadvances/advance-article/doi/10.1093/bioadv/vbag057/8488725)
+[![DOI](https://img.shields.io/badge/DOI-10.1093%2Fbioadv%2Fvbag057-green)](https://doi.org/10.1093/bioadv/vbag057)
+[![R](https://img.shields.io/badge/R-%3E%3D%203.6.0-276DC3)](https://cran.r-project.org/)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![GitHub last commit](https://img.shields.io/github/last-commit/shashank-KU/OmniCorr)](https://github.com/shashank-KU/OmniCorr)
+[![GitHub issues](https://img.shields.io/github/issues/shashank-KU/OmniCorr)](https://github.com/shashank-KU/OmniCorr/issues)
+
+<!-- badges: end -->
 OmniCorr is an R package–style framework for correlation-based integration and visualization of multi-omics datasets, including transcriptomics, metatranscriptomics, metagenomics, metaproteomics, and associated sample metadata. The framework is designed to facilitate interpretable, feature-level comparison across omics layers and to generate aligned heatmap visualizations highlighting putative cross-omics associations.
 
 OmniCorr focuses on:
@@ -28,6 +36,16 @@ Before using OmniCorr, users should ensure that:
 - Input matrices are numeric with samples as rows and features as columns
 
 - Feature-level summaries (e.g. hub genes, pathways, taxa) are provided as input
+
+## Publication
+
+OmniCorr has been peer-reviewed and published in *Bioinformatics Advances*.
+
+**OmniCorr: correlation-based integration and visualization of multi-omics datasets.**  
+Bioinformatics Advances (2026).  
+https://academic.oup.com/bioinformaticsadvances/advance-article/doi/10.1093/bioadv/vbag057/8488725  
+If you use OmniCorr in your research, please cite this article.
+
 
 ## Installation
 
