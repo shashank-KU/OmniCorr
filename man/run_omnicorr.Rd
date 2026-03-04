@@ -2,22 +2,21 @@
 % Please edit documentation in R/run_omnicorr.R
 \name{run_omnicorr}
 \alias{run_omnicorr}
-\title{Run OmniCorr Multi-Omics Integration (Production Version)}
+\title{Run OmniCorr Multi-Omics Integration}
 \usage{
 run_omnicorr(
   reference_layer,
   comparison_layers,
   metadata = NULL,
+  reference_name = "Reference Layer",
+  comparison_names = NULL,
+  metadata_name = "Metadata",
   method = "pearson",
   adjust_method = "fdr",
   use = "all.obs",
   show_significance = "stars",
   cluster_reference_rows = TRUE,
-  cluster_reference_columns = FALSE,
-  cluster_comparison_rows = FALSE,
-  cluster_comparison_columns = FALSE,
-  cluster_metadata_rows = FALSE,
-  cluster_metadata_columns = FALSE,
+  cluster_reference_columns = TRUE,
   show_row_names = TRUE,
   show_column_names = TRUE,
   font_size = 8,
@@ -30,48 +29,45 @@ run_omnicorr(
 
 \item{comparison_layers}{Named list of numeric matrices/data.frames.}
 
-\item{metadata}{Optional numeric matrix/data.frame.}
+\item{metadata}{Optional numeric matrix/data.frame (samples x variables).
+#' @param reference_name Title for the reference heatmap.}
 
-\item{method}{The correlation method to be used.
-Default is "pearson". Other options include "spearman" and "kendall".}
+\item{comparison_names}{Optional titles for comparison heatmaps.}
 
-\item{adjust_method}{Method for adjusting the p-values for multiple testing.
-Default is "fdr". If "none", no adjustment is applied.
-Supports all methods from \code{p.adjust.methods}.}
+\item{metadata_name}{Title for metadata heatmap.}
 
-\item{use}{Handling of missing data.
-One of "all.obs" or "pairwise.complete.obs".}
+\item{method}{Correlation method: \code{"pearson"}, \code{"spearman"}, \code{"kendall"}.}
 
-\item{show_significance}{How to represent significance in the output.
-One of "stars", "p_value", or "correlation".}
+\item{adjust_method}{P-value correction method (\code{stats::p.adjust.methods}).}
 
-\item{cluster_reference_rows}{Logical.}
+\item{use}{Missing value handling strategy (\code{"all.obs"} or \code{"pairwise.complete.obs"}).}
 
-\item{cluster_reference_columns}{Logical.}
+\item{show_significance}{\code{"stars"}, \code{"p_value"}, or \code{"correlation"}.}
 
-\item{cluster_comparison_rows}{Logical.}
+\item{cluster_reference_rows}{Cluster reference features.}
 
-\item{cluster_comparison_columns}{Logical.}
+\item{cluster_reference_columns}{Cluster reference samples.}
 
-\item{cluster_metadata_rows}{Logical.}
+\item{show_row_names}{Logical; display row labels.}
 
-\item{cluster_metadata_columns}{Logical.}
+\item{show_column_names}{Logical; display column labels.}
 
-\item{show_row_names}{Logical.}
+\item{font_size}{Font size for row/column labels.}
 
-\item{show_column_names}{Logical.}
+\item{star_font_size}{Font size for cell annotations.}
 
-\item{font_size}{Numeric.}
-
-\item{star_font_size}{Numeric.}
-
-\item{verbose}{Logical; print progress messages.}
+\item{verbose}{Print progress messages.}
 }
 \value{
-Invisibly returns a ComplexHeatmap::HeatmapList object.
+Invisibly returns a \code{ComplexHeatmap::HeatmapList}.
 }
 \description{
 Integrates multiple omics layers by computing correlations between a
-reference layer and comparison layers, optionally including metadata.
-Produces a multi-panel integrated heatmap using ComplexHeatmap.
+reference omics dataset and multiple comparison layers and visualizing the
+results as aligned multi-panel heatmaps using \pkg{ComplexHeatmap}.
+
+The reference layer is displayed as an expression heatmap with optional
+clustering of features and samples. Correlation heatmaps for comparison
+layers and metadata are aligned to the same reference feature order to
+ensure consistent interpretation across panels.
 }

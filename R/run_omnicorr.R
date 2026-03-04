@@ -10,10 +10,10 @@
 #' layers and metadata are aligned to the same reference feature order to
 #' ensure consistent interpretation across panels.
 #'
-#' @param reference_layer Numeric matrix/data.frame (samples × features).
+#' @param reference_layer Numeric matrix/data.frame (samples x features).
 #' @param comparison_layers Named list of numeric matrices/data.frames.
-#' @param metadata Optional numeric matrix/data.frame (samples × variables).
-#' @param reference_name Title for the reference heatmap.
+#' @param metadata Optional numeric matrix/data.frame (samples x variables).
+#' #' @param reference_name Title for the reference heatmap.
 #' @param comparison_names Optional titles for comparison heatmaps.
 #' @param metadata_name Title for metadata heatmap.
 #' @param method Correlation method: `"pearson"`, `"spearman"`, `"kendall"`.
@@ -119,11 +119,11 @@ run_omnicorr <- function(
   
   if(verbose){
     message("==================================================")
-    message("🔷 OmniCorr Multi-Omics Integration")
+    message("OmniCorr Multi-Omics Integration")
     message("==================================================")
     message("Samples: ", nrow(reference_layer))
     message("Reference Features: ", ncol(reference_layer))
-    message("✔ Sample alignment verified")
+    message("Sample alignment verified")
   }
   
   feature_dendro <- FALSE
@@ -270,7 +270,7 @@ run_omnicorr <- function(
   )
   
   if(verbose){
-    message("✔ OmniCorr integration complete")
+    message("OmniCorr integration complete")
     message("==================================================")
   }
   
