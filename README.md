@@ -119,7 +119,7 @@ df_list <- CheckSampleOrder(Transcriptomics, Metagenomics)
 Transcriptomics <- df_list[[1]]
 Metagenomics <- df_list[[2]]
 ```
-## Core workflow
+## Manual steps
 ### Step 1: Feature clustering (reference layer)
 
 The following steps use OmniCorr to integrate transcriptomics and metagenomics data and visualize the results. First perform hierarchical clustering of transcriptomics
@@ -263,8 +263,7 @@ cowplot::plot_grid(
 ```
 ![Rplot01](https://user-images.githubusercontent.com/30895959/223760509-8c3d8f8e-d232-4c0c-8832-9aa4c1ecf5d9.png)
 
-
-## Fully Automated Multi-Omics Integration
+## Fully Automated steps
 OmniCorr provides a single high-level function, `run_omnicorr()`, that performs the complete integration workflow automatically.
 No manual clustering, dendrogram creation, heatmap alignment, or p-value formatting is required.
 
