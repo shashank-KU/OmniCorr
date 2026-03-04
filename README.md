@@ -59,7 +59,7 @@ Some dependencies are available via Bioconductor:
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 
-BiocManager::install(c("impute", "preprocessCore", "GO.db"))
+BiocManager::install(c("impute", "preprocessCore", "GO.db", "ComplexHeatmap"))
 ```
 Install required CRAN packages:
 ```r
