@@ -120,14 +120,12 @@ Transcriptomics <- df_list[[1]]
 Metagenomics <- df_list[[2]]
 ```
 ## Two ways to run OmniCorr
-
 OmniCorr can be used in **two complementary ways**, depending on the level of control required:
 
 | Workflow | Description | Best for |
 |---------|-------------|---------|
-| **Manual workflow** | Users perform clustering, correlation calculation, and heatmap construction step-by-step using individual OmniCorr helper functions. | Maximum control, method development, or custom visualization pipelines |
-| **Fully automated workflow** | A single function `run_omnicorr()` performs the entire integration pipeline automatically. | Fast analysis, reproducible workflows, and standard analyses |
-
+| **[Manual workflow](#manual-workflow)** | Users perform clustering, correlation calculation, and heatmap construction step-by-step using individual OmniCorr helper functions. | Maximum control, method development, or custom visualization pipelines |
+| **[Fully automated workflow](#fully-automated-workflow)** | A single function `run_omnicorr()` performs the entire integration pipeline automatically. | Fast analysis, reproducible workflows, and standard analyses |
 ---
 
 ### Manual workflow
