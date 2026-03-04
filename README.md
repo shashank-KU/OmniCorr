@@ -285,12 +285,13 @@ The function internally performs:
 Run the full integration with one command:
 ``` r
 run_omnicorr(
-  reference_layer = Transcriptomics,
-  comparison_layers = list(
-    Metagenomics = Metagenomics,
-    Metatranscriptomics = Metatranscriptomics
-  ),
-  metadata = metadata
+    reference_layer = Transcriptomics,
+    reference_name = "Transcriptomics",
+    comparison_layers = list(
+        Metagenomics = Metagenomics,
+        Metatranscriptomics = Metatranscriptomics
+    ),
+    metadata = metadata
 )
 ```
 <img width="1400" height="800" alt="Omnicorr" src="https://github.com/user-attachments/assets/0a5ca5b4-6110-4e6b-a7e0-784096a524d1" />
