@@ -293,6 +293,6 @@ run_omnicorr(
   metadata = metadata
 )
 ```
-<img width="2600" height="1600" alt="Omnicorr" src="https://github.com/user-attachments/assets/3fc96855-0898-4598-986f-efa97e1036a9" />
+<img width="1400" height="800" alt="Omnicorr" src="https://github.com/user-attachments/assets/0a5ca5b4-6110-4e6b-a7e0-784096a524d1" />
 
 
