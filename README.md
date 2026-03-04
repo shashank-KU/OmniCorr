@@ -282,6 +282,7 @@ The function internally performs:
 
 - Construction of aligned multi-panel heatmaps
 
+### Basic Usage
 Run the full integration with one command:
 ``` r
 run_omnicorr(
@@ -296,4 +297,88 @@ run_omnicorr(
 ```
 <img width="1400" height="800" alt="Omnicorr" src="https://github.com/user-attachments/assets/0a5ca5b4-6110-4e6b-a7e0-784096a524d1" />
 
+### Changing the Reference Omics Layer
+Any omics dataset can be used as the reference layer. For example, to use metatranscriptomics as the reference:
+``` r
+run_omnicorr(
+    reference_layer = Metatranscriptomics,
+    reference_name = "Metatranscriptomics",
+    comparison_layers = list(
+        Transcriptomics = Transcriptomics,
+        Metagenomics = Metagenomics
+    ),
+    metadata = metadata
+)
+``` 
 
+
+### Running OmniCorr Without Metadata
+Any omics dataset can be used as the reference layer. For example, to use metatranscriptomics as the reference:
+``` r
+run_omnicorr(
+    reference_layer = Transcriptomics,
+    reference_name = "Transcriptomics",
+    comparison_layers = list(
+        Metagenomics = Metagenomics,
+        Metatranscriptomics = Metatranscriptomics
+    )
+)
+``` 
+
+
+### Customizing Heatmap Titles
+Any omics dataset can be used as the reference layer. For example, to use metatranscriptomics as the reference:
+``` r
+run_omnicorr(
+    reference_layer = Transcriptomics,
+    reference_name = "Host Gene Expression",
+    comparison_layers = list(
+        Microbiome = Metagenomics,
+        Microbial_Activity = Metatranscriptomics
+    ),
+    metadata = metadata,
+    metadata_name = "Environmental Variables"
+)
+``` 
+
+### Changing Correlation Method
+OmniCorr supports multiple correlation methods.
+#### Spearman correlation 
+``` r
+run_omnicorr(
+    reference_layer = Transcriptomics,
+    comparison_layers = list(
+        Metagenomics = Metagenomics,
+        Metatranscriptomics = Metatranscriptomics
+    ),
+    metadata = metadata,
+    method = "spearman"
+)
+```
+#### Kendall correlation
+``` r
+run_omnicorr(
+    reference_layer = Transcriptomics,
+    comparison_layers = list(
+        Metagenomics = Metagenomics,
+        Metatranscriptomics = Metatranscriptomics
+    ),
+    metadata = metadata,
+    method = "kendall"
+)
+``` 
+
+### Adjusting Label Visibility
+Users can control whether row or column labels are shown.
+``` r
+run_omnicorr(
+    reference_layer = Transcriptomics,
+    comparison_layers = list(
+        Metagenomics = Metagenomics,
+        Metatranscriptomics = Metatranscriptomics
+    ),
+    metadata = metadata,
+    show_row_names = FALSE,
+    show_column_names = TRUE
+)
+``` 
