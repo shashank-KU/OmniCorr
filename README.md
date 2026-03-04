@@ -119,8 +119,19 @@ df_list <- CheckSampleOrder(Transcriptomics, Metagenomics)
 Transcriptomics <- df_list[[1]]
 Metagenomics <- df_list[[2]]
 ```
-## Manual steps
-### Step 1: Feature clustering (reference layer)
+## Two ways to run OmniCorr
+
+OmniCorr can be used in **two complementary ways**, depending on the level of control required:
+
+| Workflow | Description | Best for |
+|---------|-------------|---------|
+| **Manual workflow** | Users perform clustering, correlation calculation, and heatmap construction step-by-step using individual OmniCorr helper functions. | Maximum control, method development, or custom visualization pipelines |
+| **Fully automated workflow** | A single function `run_omnicorr()` performs the entire integration pipeline automatically. | Fast analysis, reproducible workflows, and standard analyses |
+
+---
+
+### Manual workflow
+#### Step 1: Feature clustering (reference layer)
 
 The following steps use OmniCorr to integrate transcriptomics and metagenomics data and visualize the results. First perform hierarchical clustering of transcriptomics
 
@@ -128,7 +139,7 @@ The following steps use OmniCorr to integrate transcriptomics and metagenomics d
 dendro <- hclust(as.dist(1 - WGCNA::bicor(Transcriptomics, maxPOutliers = 0.05)), method = "ward.D2")
 ```
 
-### Step 2: Transcriptomics heatmap
+#### Step 2: Transcriptomics heatmap
 
 ``` r
 tx_heatmap <- pheatmap::pheatmap(
@@ -142,7 +153,7 @@ tx_heatmap <- pheatmap::pheatmap(
 
 This heatmap provides the structural backbone for aligning downstream correlation heatmaps.
 
-### Step 3: Cross-omics correlation analysis
+#### Step 3: Cross-omics correlation analysis
 
 Use the `calculate_correlations()` function from `OmniCorr` to calculate `Pearson` correlations between the transposed transcriptomics data and the metagenomics data
 
@@ -167,7 +178,7 @@ Each call returns:
 
 - significance annotations
 
-### Step 4: Correlation heatmaps
+#### Step 4: Correlation heatmaps
 
 Create a color ramp for the heatmap using `colorRampPalette()`
 Generate a heatmap of the correlations using `pheatmap()` with the dendrogram from [Step 1](https://github.com/shashank-KU/OmniCorr#step-1-perform-hierarchical-clustering-of-transcriptomics-data-using-wgcna), the color ramp, and no row tree
@@ -199,7 +210,7 @@ hm_mt <- pheatmap::pheatmap(
   main = "Metatranscriptomics")
 ```
 
-### Optional downstream visualization (recommended, not required)
+#### Optional downstream visualization (recommended, not required)
 
 Use the `plot_grid()` function from the cowplot package to combine the two heatmaps into a single figure with two columns
 Set the relative widths of the two columns using the `rel_widths` parameter
@@ -225,7 +236,7 @@ ggplot2::theme(
 
 
 
-### Step 5: Integrate the external heatmap
+#### Step 5: Integrate the external heatmap
 
 OmniCorr can correlate omics features with phenotypic or environmental variables.
 
@@ -263,7 +274,7 @@ cowplot::plot_grid(
 ```
 ![Rplot01](https://user-images.githubusercontent.com/30895959/223760509-8c3d8f8e-d232-4c0c-8832-9aa4c1ecf5d9.png)
 
-## Fully Automated steps
+### Fully automated workflow
 OmniCorr provides a single high-level function, `run_omnicorr()`, that performs the complete integration workflow automatically.
 No manual clustering, dendrogram creation, heatmap alignment, or p-value formatting is required.
 
@@ -281,7 +292,7 @@ The function internally performs:
 
 - Construction of aligned multi-panel heatmaps
 
-### Basic Usage
+#### Basic Usage
 Run the full integration with one command:
 ``` r
 run_omnicorr(
@@ -296,7 +307,7 @@ run_omnicorr(
 ```
 <img width="1400" height="800" alt="Omnicorr" src="https://github.com/user-attachments/assets/0a5ca5b4-6110-4e6b-a7e0-784096a524d1" />
 
-### Changing the Reference Omics Layer
+#### Changing the Reference Omics Layer
 Any omics dataset can be used as the reference layer. For example, to use metatranscriptomics as the reference:
 ``` r
 run_omnicorr(
@@ -311,7 +322,7 @@ run_omnicorr(
 ``` 
 
 
-### Running OmniCorr Without Metadata
+#### Running OmniCorr Without Metadata
 Any omics dataset can be used as the reference layer. For example, to use metatranscriptomics as the reference:
 ``` r
 run_omnicorr(
@@ -325,7 +336,7 @@ run_omnicorr(
 ``` 
 
 
-### Customizing Heatmap Titles
+#### Customizing Heatmap Titles
 Any omics dataset can be used as the reference layer. For example, to use metatranscriptomics as the reference:
 ``` r
 run_omnicorr(
@@ -340,9 +351,9 @@ run_omnicorr(
 )
 ``` 
 
-### Changing Correlation Method
+#### Changing Correlation Method
 OmniCorr supports multiple correlation methods.
-#### Spearman correlation 
+##### Spearman correlation 
 ``` r
 run_omnicorr(
     reference_layer = Transcriptomics,
@@ -354,7 +365,7 @@ run_omnicorr(
     method = "spearman"
 )
 ```
-#### Kendall correlation
+##### Kendall correlation
 ``` r
 run_omnicorr(
     reference_layer = Transcriptomics,
@@ -367,7 +378,7 @@ run_omnicorr(
 )
 ``` 
 
-### Adjusting Label Visibility
+#### Adjusting Label Visibility
 Users can control whether row or column labels are shown.
 ``` r
 run_omnicorr(
