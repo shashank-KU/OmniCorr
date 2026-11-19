@@ -1,9 +1,8 @@
-```
 ---
 title: "OmniCorr: Salmon multi-omics integration workflow"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{OmniCorr – Salmon Workflow}
+  %\VignetteIndexEntry{OmniCorr: Salmon multi-omics integration workflow}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -123,7 +122,9 @@ tx_heatmap <- pheatmap(
 )
 ```
 
-→ This heatmap will serve as **structural backbone** for all following plots
+**Interpretation:** The transcriptomics heatmap provides an overview of variation in transcriptomic features across salmon samples. Each row represents a transcriptomic feature, and each column represents a sample. Features are hierarchically clustered according to their correlation patterns, so features with similar profiles across samples are positioned closer together.
+
+This clustering defines a common feature order that is maintained in the subsequent cross-omics correlation heatmaps. Consequently, users can examine whether groups of transcriptomic features showing similar abundance patterns are also associated with particular microbial taxa or metatranscriptomic features.
 
 ### Step 3 – Cross-omics correlation analysis
 
@@ -199,6 +200,12 @@ plot_grid(
 )
 ```
 
+**Interpretation:** The combined heatmap allows users to explore associations between transcriptomic features and the two microbial omics layers. The transcriptomics heatmap is displayed alongside correlation heatmaps for metagenomics and metatranscriptomics, with the reference features aligned across panels.
+
+In the correlation heatmaps, red indicates positive correlations, whereas blue indicates negative correlations. Stronger colors correspond to larger absolute correlation coefficients, while colors closer to white indicate weaker associations. Significance stars indicate statistical significance based on Benjamini–Hochberg false discovery rate (FDR)-adjusted p-values: `*` for 0.01 < p_adj ≤ 0.05, `**` for 0.001 < p_adj ≤ 0.01, and `***` for p_adj ≤ 0.001. Correlations without stars do not meet the FDR-adjusted significance threshold of 0.05.
+
+For example, a group of transcriptomic features showing positive correlations with particular metagenomic features may suggest coordinated variation between host gene expression and microbial abundance. Associations with metatranscriptomic features may provide additional information about microbial activity. These patterns can help identify candidate host–microbiome relationships for further investigation, although correlation alone does not establish causality.
+
 ### Bonus: Correlation with metadata
 
 ```{r metadata-correlation}
@@ -226,6 +233,12 @@ pheatmap(
 )
 ```
 
+**Interpretation:** This heatmap illustrates the correlations between transcriptomic features and the available sample metadata. Each cell represents the correlation between a transcriptomic feature and a metadata variable. Red indicates positive correlations, while blue indicates negative correlations, with stronger colors representing larger absolute correlation coefficients. Significance stars highlight associations meeting the statistical significance thresholds.
+
+This visualization can help identify transcriptomic features associated with environmental or sample-level characteristics. For example, a positive correlation indicates that higher values of a metadata variable tend to occur alongside higher values of a transcriptomic feature, whereas a negative correlation indicates the opposite relationship.
+
+These associations may help identify potential environmental influences on host gene expression or variables that should be considered when interpreting the cross-omics correlations. However, they should be interpreted as associations rather than evidence of direct biological effects.
+
 ## Complete multi-omics integration with OmniCorr
 
 The `run_omnicorr()` function integrates the reference layer,
@@ -246,6 +259,12 @@ salmon_heatmap <- run_omnicorr(
   show_row_names = FALSE
 )
 ```
+
+**Interpretation:** The final OmniCorr heatmap brings together the transcriptomics reference layer, its correlations with metagenomics and metatranscriptomics, and associations with sample metadata in a single visualization. The shared reference-feature ordering allows users to compare patterns across the different omics layers.
+
+To interpret the integrated heatmap, users can first identify groups of transcriptomic features with similar profiles and then examine whether these groups show consistent positive or negative correlations with microbial features. For example, a group of host transcriptomic features positively associated with metagenomic features may suggest a relationship between host gene expression and microbial community composition. If similar associations are also observed with metatranscriptomic features, they may provide additional evidence of coordinated host–microbiome variation.
+
+The metadata panel provides further context by highlighting associations with sample characteristics. Together, these results can help prioritize candidate features and biological relationships for downstream analyses, such as functional enrichment or targeted validation. However, the correlations are exploratory and should not be interpreted as evidence of causality.
 
 ## Summary
 

@@ -179,13 +179,15 @@ run_omnicorr <- function(
     }
   }
 
-  if(verbose){
-    message("==================================================")
-    message("OmniCorr Multi-Omics Integration")
-    message("==================================================")
-    message("Samples: ", nrow(reference_layer))
-    message("Reference Features: ", ncol(reference_layer))
-    message("Sample alignment verified")
+  if (verbose) {
+    message(
+      "==================================================\n",
+      "OmniCorr Multi-Omics Integration\n",
+      "==================================================\n",
+      "Samples: ", nrow(reference_layer), "\n",
+      "Reference Features: ", ncol(reference_layer), "\n",
+      "Sample alignment verified"
+    )
   }
 
   feature_dendro <- FALSE
@@ -331,9 +333,11 @@ run_omnicorr <- function(
     heatmap_legend_side = "right"
   )
 
-  if(verbose){
-    message("OmniCorr integration complete")
-    message("==================================================")
+  if (verbose) {
+    message(
+      "OmniCorr integration complete\n",
+      "=================================================="
+    )
   }
 
   invisible(ht)
