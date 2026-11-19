@@ -19,3 +19,5 @@ Meta/
 # Project directories excluded from Git
 Case_Study_2/
 raw-data/
+
+/raw-data/zenodo_source/
