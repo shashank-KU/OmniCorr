@@ -1,5 +1,5 @@
 Package: OmniCorr
-Title: Multi-omics Integration and Visualization Framework
+Title: Multi-Omics Integration and Visualization Framework
 Version: 0.99.3
 Authors@R:
     c(
@@ -35,7 +35,7 @@ Authors@R:
             comment = "Project 0054575-SuPAcow"
         )
     )
-Description: OmniCorr is an R package for correlation-based integration and
+Description: Provides tools for correlation-based integration and
     visualization of multi-omics datasets, including transcriptomics,
     metatranscriptomics, metagenomics, metaproteomics, and associated sample
     metadata. The package computes pairwise correlations between independently
