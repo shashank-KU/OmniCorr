@@ -4,7 +4,7 @@
 library(dplyr)
 
 sample_info <- read.csv(
-  "raw-data/transcriptomics/sample_info.csv",
+  "raw-data/zenodo_source/salmon/transcriptomics/sample_info.csv",
   row.names = 1
 )
 
@@ -28,5 +28,16 @@ metadata <- sample_info %>%
 rownames(metadata) <- metadata$Group
 metadata$Group <- NULL
 
-# Save the dataset
-save(metadata, file = "data/metadata.rda")
+# Save the reproduced metadata separately
+output_dir <- "raw-data/metadata"
+
+dir.create(
+  output_dir,
+  recursive = TRUE,
+  showWarnings = FALSE
+)
+
+saveRDS(
+  metadata,
+  file.path(output_dir, "metadata_reproduced.rds")
+)
