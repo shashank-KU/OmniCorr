@@ -6,9 +6,14 @@ This directory contains R scripts used to generate and validate the example data
 
 The source datasets are maintained separately from the R package to avoid including large intermediate files in the package distribution.
 
-A source-data ZIP archive has been prepared for deposition on Zenodo. The archive is not yet publicly available.
 
-Until a permanent Zenodo URL is available, the archive can be supplied locally using the `OMNICORR_SOURCE_ARCHIVE` environment variable.
+The source datasets and processed intermediates are publicly available on Zenodo:
+
+**DOI:** https://doi.org/10.5281/zenodo.24369762
+
+**Archive:** `OmniCorr_source_data.zip`
+
+Download the ZIP archive from Zenodo and provide its local path using the `OMNICORR_SOURCE_ARCHIVE` environment variable.
 
 Run all scripts from the root directory of the OmniCorr repository.
 
@@ -91,10 +96,15 @@ Although the reconstructed gene-to-module assignments match the corresponding or
 
 Therefore, the upstream generation of the liver WGCNA intermediate has not yet been independently reproduced from the original count data.
 
+
 ## 6. Data provenance and availability
 
 The source archive contains both source datasets and previously generated analysis intermediates. It should not be interpreted as containing raw sequencing data for all omics layers.
 
-The Zenodo DOI and permanent download URL will be added after publication.
+The source archive is publicly available on Zenodo:
 
-Redistribution permissions and licensing must be confirmed with the relevant data owners before the archive is made public.
+**Gupta, S., Quarato, V., et al. (2026). OmniCorr: Source datasets for reproducible multi-omics examples. Zenodo.**
+
+https://doi.org/10.5281/zenodo.24369762
+
+The archive is distributed under the Creative Commons Attribution 4.0 International (CC BY 4.0) license.
