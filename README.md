@@ -8,8 +8,8 @@
 [![DOI](https://img.shields.io/badge/DOI-10.1093%2Fbioadv%2Fvbag057-green)](https://doi.org/10.1093/bioadv/vbag057)
 [![R](https://img.shields.io/badge/R-%3E%3D%204.6.0-276DC3)](https://cran.r-project.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![GitHub last commit](https://img.shields.io/github/last-commit/veronicaquarato/OmniCorr)](https://github.com/veronicaquarato/OmniCorr)
-[![GitHub issues](https://img.shields.io/github/issues/veronicaquarato/OmniCorr)](https://github.com/veronicaquarato/OmniCorr/issues)
+[![GitHub last commit](https://img.shields.io/github/last-commit/shashank-KU/OmniCorr)](https://github.com/shashank-KU/OmniCorr)
+[![GitHub issues](https://img.shields.io/github/issues/shashank-KU/OmniCorr)](https://github.com/shashank-KU/OmniCorr/issues)
 
 <!-- badges: end -->
 
@@ -59,7 +59,7 @@ The development version can be installed from GitHub:
 
 ```r
 install.packages("pak")
-pak::pak("veronicaquarato/OmniCorr")
+pak::pak("shashank-KU/OmniCorr")
 ```
 
 ### Bioconductor
@@ -117,10 +117,10 @@ Check sample alignment:
 all(rownames(Transcriptomics) == rownames(Metagenomics))
 ```
 
-If sample order differs, use the `CheckSampleOrder()` helper function:
+If sample order differs, use the `check_sample_order()` helper function:
 
 ```r
-df_list <- CheckSampleOrder(Transcriptomics, Metagenomics)
+df_list <- check_sample_order(Transcriptomics, Metagenomics)
 
 Transcriptomics <- df_list[[1]]
 Metagenomics <- df_list[[2]]
