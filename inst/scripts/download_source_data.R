@@ -61,7 +61,8 @@ expected_files <- c(
   "salmon/metatranscriptomics/metatranscriptomics.rds",
   "salmon/transcriptomics/Transcriptomics_count.txt.gz",
   "salmon/transcriptomics/sample_info.csv",
-  "salmon/transcriptomics/Salmo_salar-GCA_905237065.2_gene_annotations.tsv"
+  "salmon/transcriptomics/Salmo_salar-GCA_905237065.2_gene_annotations.tsv",
+  "salmon/transcriptomics/stage2results_Transcriptomics_Liver.rds"
 )
 
 # 4. Check whether extraction is necessary
@@ -95,7 +96,10 @@ if (length(missing_files) > 0) {
 
 }
 
-message("All 16 source files are available.")
+message(
+  "All ", length(expected_files),
+  " source files are available."
+)
 
 message(
   "Source data directory: ",

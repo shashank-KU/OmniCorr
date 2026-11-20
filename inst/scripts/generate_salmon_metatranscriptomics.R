@@ -3,7 +3,7 @@
 # =============================================================================
 #
 # Input:
-#   raw-data/metatranscriptomics/metatranscriptomics.rds
+#   raw-data/zenodo_source/salmon/metatranscriptomics/metatranscriptomics.rds
 #
 # Output:
 #   Metatranscriptomics: 36 samples x 11 module eigengenes
@@ -36,7 +36,7 @@ library(tibble)
 # 1. Load raw data ------------------------------------------------------------
 
 dds <- readRDS(
-  "raw-data/metatranscriptomics/metatranscriptomics.rds"
+  "raw-data/zenodo_source/salmon/metatranscriptomics/metatranscriptomics.rds"
 )
 
 # 2. Preprocess the data ------------------------------------------------------
@@ -196,6 +196,12 @@ stopifnot(
 message("Verification successful: reproduced data match packaged data.")
 
 # 10. Save the reproduced dataset ---------------------------------------------
+
+dir.create(
+  "raw-data/metatranscriptomics",
+  recursive = TRUE,
+  showWarnings = FALSE
+)
 
 # Save a separate copy without overwriting the packaged dataset.
 saveRDS(
