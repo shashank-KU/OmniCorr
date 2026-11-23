@@ -4,15 +4,15 @@
 \name{OmniCorr-package}
 \alias{OmniCorr}
 \alias{OmniCorr-package}
-\title{OmniCorr: Multi-omics Integration and Visualization Framework}
+\title{OmniCorr: Multi-Omics Integration and Visualization Framework}
 \description{
-OmniCorr is an R package for correlation-based integration and visualization of multi-omics datasets, including transcriptomics, metatranscriptomics, metagenomics, metaproteomics, and associated sample metadata. The package computes pairwise correlations between independently processed omics layers and provides flexible tools for organizing and visualizing cross-omics associations using aligned heatmaps and optional network-style visualizations. OmniCorr is designed to complement existing preprocessing and network inference workflows rather than replace them.
+Provides tools for correlation-based integration and visualization of multi-omics datasets, including transcriptomics, metatranscriptomics, metagenomics, metaproteomics, and associated sample metadata. The package computes pairwise correlations between independently processed omics layers and provides flexible tools for organizing and visualizing cross-omics associations using aligned heatmaps and optional network-style visualizations. OmniCorr is designed to complement existing preprocessing and network inference workflows rather than replace them.
 }
 \seealso{
 Useful links:
 \itemize{
-  \item \url{https://github.com/veronicaquarato/OmniCorr}
-  \item Report bugs at \url{https://github.com/veronicaquarato/OmniCorr/issues}
+  \item \url{https://github.com/shashank-KU/OmniCorr}
+  \item Report bugs at \url{https://github.com/shashank-KU/OmniCorr/issues}
 }
 
 }

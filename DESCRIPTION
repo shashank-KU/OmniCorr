@@ -75,7 +75,7 @@ biocViews:
     Proteomics,
     Transcriptomics,
     Software
-URL: https://github.com/veronicaquarato/OmniCorr
-BugReports: https://github.com/veronicaquarato/OmniCorr/issues
+URL: https://github.com/shashank-KU/OmniCorr
+BugReports: https://github.com/shashank-KU/OmniCorr/issues
 Config/testthat/edition: 3
 Config/roxygen2/version: 8.1.1

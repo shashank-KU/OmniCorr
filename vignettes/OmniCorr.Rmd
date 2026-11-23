@@ -46,7 +46,7 @@ During development, the package can be installed from GitHub:
 if (!requireNamespace("remotes", quietly = TRUE))
     install.packages("remotes")
 
-remotes::install_github("veronicaquarato/OmniCorr")
+remotes::install_github("shashank-KU/OmniCorr")
 ```
 
 Once OmniCorr is accepted and available in a Bioconductor release, it can be installed using:
