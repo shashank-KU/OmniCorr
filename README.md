@@ -16,7 +16,7 @@
 > [!IMPORTANT]
 > **OmniCorr is now available through Bioconductor.**
 >
-> **Package page:** https://bioconductor.org/packages/OmniCorr
+> **Package page:** [https://bioconductor.org/packages/OmniCorr](https://bioconductor.org/packages/devel/bioc/html/OmniCorr.html)
 >
 > Please install from Bioconductor rather than from this repository.
 >
