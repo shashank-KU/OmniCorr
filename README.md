@@ -61,13 +61,12 @@ OmniCorr has been peer-reviewed and published in *Bioinformatics Advances*.
 https://academic.oup.com/bioinformaticsadvances/advance-article/doi/10.1093/bioadv/vbag057/8488725
 
 If you use OmniCorr in your research, please cite this article.
+
 ## Installation
 
 OmniCorr requires R (>= 4.6.0).
 
 ### Bioconductor (recommended)
-
-OmniCorr is available through Bioconductor:
 
 ```r
 if (!require("BiocManager", quietly = TRUE))
@@ -76,14 +75,30 @@ if (!require("BiocManager", quietly = TRUE))
 BiocManager::install("OmniCorr")
 ```
 
-### Development version
-
-The development version is available from the Bioconductor devel branch:
+### Bioconductor development version
 
 ```r
 BiocManager::install(version = "devel")
 BiocManager::install("OmniCorr")
 ```
+
+### From GitHub
+
+The version associated with the publication can be installed directly from
+this repository. Note that this downloads the full repository, including
+source data intermediates (~44 MB):
+
+```r
+install.packages("pak")
+pak::pak("shashank-KU/OmniCorr")
+```
+
+For current development, use the Bioconductor source repository instead:
+
+```bash
+git clone https://git.bioconductor.org/packages/OmniCorr
+```
+
 
 ### Optional packages for examples
 
