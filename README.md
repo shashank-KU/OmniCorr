@@ -10,6 +10,8 @@
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![GitHub last commit](https://img.shields.io/github/last-commit/shashank-KU/OmniCorr)](https://github.com/shashank-KU/OmniCorr)
 [![GitHub issues](https://img.shields.io/github/issues/shashank-KU/OmniCorr)](https://github.com/shashank-KU/OmniCorr/issues)
+[![Bioconductor](https://img.shields.io/badge/Bioconductor-OmniCorr-brightgreen)](https://bioconductor.org/packages/OmniCorr)
+[![Bioconductor build](https://bioconductor.org/shields/build/devel/bioc/OmniCorr.svg)](https://bioconductor.org/checkResults/devel/bioc-LATEST/OmniCorr/)
 
 <!-- badges: end -->
 
