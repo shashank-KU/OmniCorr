@@ -13,6 +13,19 @@
 
 <!-- badges: end -->
 
+> [!IMPORTANT]
+> **OmniCorr is now available through Bioconductor.**
+>
+> **Package page:** https://bioconductor.org/packages/OmniCorr
+>
+> Please install from Bioconductor rather than from this repository.
+>
+> This repository holds the version associated with the publication
+> (*Bioinformatics Advances*, 2026) and is preserved for reproducibility.
+> Ongoing development takes place in the Bioconductor source repository:
+> `git clone https://git.bioconductor.org/packages/OmniCorr`
+
+
 OmniCorr is an R package for correlation-based integration and visualization of multi-omics datasets, including transcriptomics, metatranscriptomics, metagenomics, metaproteomics, and associated sample metadata. The package facilitates feature-level comparison across omics layers and generates aligned heatmap visualizations highlighting putative cross-omics associations.
 
 OmniCorr focuses on:
@@ -48,29 +61,30 @@ OmniCorr has been peer-reviewed and published in *Bioinformatics Advances*.
 https://academic.oup.com/bioinformaticsadvances/advance-article/doi/10.1093/bioadv/vbag057/8488725
 
 If you use OmniCorr in your research, please cite this article.
-
 ## Installation
 
 OmniCorr requires R (>= 4.6.0).
 
-### Development version
+### Bioconductor (recommended)
 
-The development version can be installed from GitHub:
-
-```r
-install.packages("pak")
-pak::pak("shashank-KU/OmniCorr")
-```
-
-### Bioconductor
-
-OmniCorr is being prepared for submission to Bioconductor. Following acceptance, the package will be available through Bioconductor:
+OmniCorr is available through Bioconductor:
 
 ```r
 if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
 
 BiocManager::install("OmniCorr")
+```
+
+### Development version
+
+The development version is available from the Bioconductor devel branch:
+
+```r
+BiocManager::install(version = "devel")
+BiocManager::install("OmniCorr")
+```
+
 ```
 
 ### Optional packages for examples
