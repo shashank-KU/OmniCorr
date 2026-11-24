@@ -85,8 +85,6 @@ BiocManager::install(version = "devel")
 BiocManager::install("OmniCorr")
 ```
 
-```
-
 ### Optional packages for examples
 
 Some examples in this README use packages listed in `Suggests`, including `pheatmap`, `cowplot`, and `ggplot2`. These packages are not required for the core OmniCorr functions but can be installed if needed:
